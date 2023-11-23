@@ -6,24 +6,81 @@
 #include "GameFramework/Pawn.h"
 #include "EGPlayer.generated.h"
 
+struct FEnhancedInputActionEventBinding;
+struct FInputActionValue;
+
+class UInputAction;
+class UInputMappingContext;
+class USphereComponent;
+class UStaticMeshComponent;
+class USpringArmComponent;
+class UCameraComponent;
+
 UCLASS()
 class EXOGOLF_API AEGPlayer : public APawn
 {
 	GENERATED_BODY()
 
+protected:
+	//==== Components ====
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USphereComponent* SphereComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UStaticMeshComponent* StaticMeshComponent;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USpringArmComponent* SpringArmComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UCameraComponent* CameraComponent;
+	
+	//==== Inputs ====
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputMappingContext* InputMapping;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* IA_LMB;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* IA_RMB;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UInputAction* IA_MousePos;
+
+	UPROPERTY()
+	UEnhancedInputComponent* EIC;
+
+private:
+	FVector2D MousePos = FVector2d::Zero();
+	int LMBMousePosEventHandle = 0;
+	int RMBMousePosEventHandle = 0;
+	
 public:
-	// Sets default values for this pawn's properties
 	AEGPlayer();
+	virtual void Tick(float DeltaTime) override; // I keep it in case I need it in the future. It's ok because bCanEverTick == false.
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+private:
+	//==== Input Handlers ====
+	
+	UFUNCTION()
+	void LeftClickStarted(const FInputActionValue& Value);
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UFUNCTION()
+	void LeftClickStopped(const FInputActionValue& Value);
 
+	UFUNCTION()
+	void RightClickStarted(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void RightClickStopped(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void SetMousePos(const FInputActionValue& Value);
 };
