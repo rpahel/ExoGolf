@@ -22,57 +22,60 @@ class EXOGOLF_API AEGPlayer : public APawn, public IScalable
 {
 	GENERATED_BODY()
 
-protected:
+private:
 	//==== Components ====
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Player|Components")
 	USphereComponent* SphereComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Player|Components")
 	UStaticMeshComponent* StaticMeshComponent;
 	
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Player|Components")
 	USpringArmComponent* SpringArmComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Components")
+	UPROPERTY(VisibleAnywhere, Category = "Player|Components")
 	UCameraComponent* CameraComponent;
 	
 	//==== Inputs ====
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputMappingContext* InputMapping;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputAction* IA_LMB;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputAction* IA_RMB;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Inputs")
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputAction* IA_MousePos;
 
 	UPROPERTY()
 	UEnhancedInputComponent* EIC;
-
-private:
+	
+	//==== Fields ====
+	
 	FVector2D MousePos = FVector2d::Zero();
-	int LMBMousePosEventHandle = 0;
-	int RMBMousePosEventHandle = 0;
+	uint32 LMBMousePosEventHandle = 0;
+	uint32 RMBMousePosEventHandle = 0;
 	
 public:
 	AEGPlayer();
-	virtual void Tick(float DeltaTime) override; // I keep it in case I need it in the future. It's ok because bCanEverTick == false.
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	//==== Interface Implementations ====
+	
 	virtual void UniformAddScale(float Amount) override;
 	virtual void NonUniformAddScale(float X, float Y, float Z) override;
 	virtual void UniformMultiplyScale(float Amount) override;
 	virtual void NonUniformMultiplyScale(float X, float Y, float Z) override;
-
-protected:
-	virtual void BeginPlay() override;
-
+	
 private:
+	//==== Overrides ====
+	
+	virtual void BeginPlay() override;
+	
 	//==== Input Handlers ====
 	
 	UFUNCTION()

@@ -8,6 +8,10 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
+//=======================================================================================|
+//===================================== PUBLIC ==========================================|
+//=======================================================================================|
+
 AEGPlayer::AEGPlayer()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -27,11 +31,6 @@ AEGPlayer::AEGPlayer()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	if(SpringArmComponent && CameraComponent)
 		CameraComponent->SetupAttachment(SpringArmComponent);
-}
-
-void AEGPlayer::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -64,7 +63,16 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EIC->BindAction(IA_RMB, ETriggerEvent::Completed, this, &AEGPlayer::RightClickStopped);
 		EIC->BindAction(IA_RMB, ETriggerEvent::Canceled, this, &AEGPlayer::RightClickStopped);
 	}
+
+	if(IA_MousePos)
+	{
+		EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetMousePos);
+	}
 }
+
+//=======================================================================================|
+//=========================== INTERFACE IMPLEMENTATIONS =================================|
+//=======================================================================================|
 
 void AEGPlayer::UniformAddScale(float Amount)
 {
@@ -92,10 +100,18 @@ void AEGPlayer::NonUniformMultiplyScale(float X, float Y, float Z)
 	SphereComponent->SetWorldScale3D(NewScale);
 }
 
+//=======================================================================================|
+//=================================== OVERRIDES =========================================|
+//=======================================================================================|
+
 void AEGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 }
+
+//=======================================================================================|
+//================================= INPUT HANDLERS ======================================|
+//=======================================================================================|
 
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
@@ -106,8 +122,6 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
 		return;
 	}
-	
-	LMBMousePosEventHandle = EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetMousePos).GetHandle();
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
@@ -119,9 +133,6 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
 		return;
 	}
-
-	EIC->RemoveBindingByHandle(LMBMousePosEventHandle);
-	LMBMousePosEventHandle = 0;
 }
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
@@ -133,8 +144,6 @@ void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
 		return;
 	}
-	
-	RMBMousePosEventHandle = EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetMousePos).GetHandle();
 }
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
@@ -146,9 +155,6 @@ void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
 		return;
 	}
-	
-	EIC->RemoveBindingByHandle(RMBMousePosEventHandle);
-	RMBMousePosEventHandle = 0;
 }
 
 void AEGPlayer::SetMousePos(const FInputActionValue& Value)
