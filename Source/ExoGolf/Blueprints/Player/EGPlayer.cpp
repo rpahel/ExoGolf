@@ -66,6 +66,32 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
+void AEGPlayer::UniformAddScale(float Amount)
+{
+	const FVector NewScale = SphereComponent->GetComponentScale() + Amount;
+	SphereComponent->SetWorldScale3D(NewScale);
+}
+
+void AEGPlayer::NonUniformAddScale(float X, float Y, float Z)
+{
+	const FVector OldScale = SphereComponent->GetComponentScale();
+	const FVector NewScale = FVector(OldScale.X + X, OldScale.Y + Y, OldScale.Z + Z);
+	SphereComponent->SetWorldScale3D(NewScale);
+}
+
+void AEGPlayer::UniformMultiplyScale(float Amount)
+{
+	const FVector NewScale = SphereComponent->GetComponentScale() * Amount;
+	SphereComponent->SetWorldScale3D(NewScale);
+}
+
+void AEGPlayer::NonUniformMultiplyScale(float X, float Y, float Z)
+{
+	const FVector OldScale = SphereComponent->GetComponentScale();
+	const FVector NewScale = FVector(OldScale.X * X, OldScale.Y * Y, OldScale.Z * Z);
+	SphereComponent->SetWorldScale3D(NewScale);
+}
+
 void AEGPlayer::BeginPlay()
 {
 	Super::BeginPlay();

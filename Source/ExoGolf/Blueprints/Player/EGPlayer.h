@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "ExoGolf/ExosDeJerome/Scalable.h"
 #include "EGPlayer.generated.h"
 
 struct FEnhancedInputActionEventBinding;
@@ -17,7 +18,7 @@ class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class EXOGOLF_API AEGPlayer : public APawn
+class EXOGOLF_API AEGPlayer : public APawn, public IScalable
 {
 	GENERATED_BODY()
 
@@ -62,6 +63,11 @@ public:
 	AEGPlayer();
 	virtual void Tick(float DeltaTime) override; // I keep it in case I need it in the future. It's ok because bCanEverTick == false.
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	virtual void UniformAddScale(float Amount) override;
+	virtual void NonUniformAddScale(float X, float Y, float Z) override;
+	virtual void UniformMultiplyScale(float Amount) override;
+	virtual void NonUniformMultiplyScale(float X, float Y, float Z) override;
 
 protected:
 	virtual void BeginPlay() override;

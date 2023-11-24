@@ -15,13 +15,16 @@ class EXOGOLF_API AEGOverlapExemple : public AActor
 	GENERATED_BODY()
 
 private:
-	//==== Exposed ====
+	//==== Exposed Fields ====
 	
-	UPROPERTY(EditAnywhere, Category = "Light|Color")
+	UPROPERTY(EditAnywhere, Category = "OverlapExemple|Light Color")
 	FColor DefaultColor;
 	
-	UPROPERTY(EditAnywhere, Category = "Light|Color")
+	UPROPERTY(EditAnywhere, Category = "OverlapExemple|Light Color")
 	FColor DetectionColor;
+
+	UPROPERTY(EditAnywhere, Category = "OverlapExemple")
+	float OverlapTimerRate = 0.5f;
 	
 	//==== Components ====
 	
@@ -31,16 +34,36 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	UPointLightComponent* PointLightComponent;
 	
+	//==== Fields ====
+
+	UPROPERTY()
+	AActor* OverlappedActor;
+	
+	FTimerHandle OverlapTimer;
+	
 public:
 	AEGOverlapExemple();
 	virtual void Tick(float DeltaTime) override;
 
 protected:
+	//==== Overrides ====
+	
 	virtual void BeginPlay() override;
 
+	//==== Event Handlers ====
+	
 	UFUNCTION()
 	virtual void OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	virtual void OnComponentEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION()
+	void OverlapTimerHandler();
+
+#if WITH_EDITOR
+	//==== Editor Only ====
+
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 };
