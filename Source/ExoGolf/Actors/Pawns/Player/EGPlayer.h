@@ -7,7 +7,7 @@
 #include "ExoGolf/ExosDeJerome/Scalable.h"
 #include "EGPlayer.generated.h"
 
-struct FEnhancedInputActionEventBinding;
+enum EMouseButtonPressed : int;
 struct FInputActionValue;
 
 class UInputAction;
@@ -23,6 +23,41 @@ class EXOGOLF_API AEGPlayer : public APawn, public IScalable
 	GENERATED_BODY()
 
 private:
+	//==== Exposed Fields ====
+
+	// The minimum distance the player has to pull back its cursor to be considered a strike.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	float MinimumStrikeDistance = 0.f;
+
+	// The impulse force applied to the ball at minimum strike distance.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	float MinimumForce = 1.f;
+
+	// Color representing minimum force.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	FColor MinimumForceColor = FColor::Green;
+
+	// The distance the player needs to pull back its cursor to strike the ball with maximum force.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	float MaximumStrikeDistance = 100.f;
+
+	// The impulse force applied to the ball at maximum strike distance.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	float MaximumForce = 100.f;
+
+	// Color representing maximum force.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	FColor MaximumForceColor = FColor::Red;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	float CameraSensitivity = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	float CameraMinimumDistance = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	float CameraMaximumDistance = 100.f;
+
 	//==== Components ====
 
 	UPROPERTY(VisibleAnywhere, Category = "Player|Components")
@@ -51,14 +86,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputAction* IA_MousePos;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
+	UInputAction* IA_Scroll;
+
 	UPROPERTY()
 	UEnhancedInputComponent* EIC;
 	
 	//==== Fields ====
-	
-	FVector2D MousePos = FVector2d::Zero();
+
 	uint32 LMBMousePosEventHandle = 0;
 	uint32 RMBMousePosEventHandle = 0;
+	TEnumAsByte<EMouseButtonPressed> MouseButtonPressed;
 	
 public:
 	AEGPlayer();
@@ -91,5 +129,8 @@ private:
 	void RightClickStopped(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void SetMousePos(const FInputActionValue& Value);
+	void SetCameraRotation(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void SetCameraDistance(const FInputActionValue& Value);
 };

@@ -2,10 +2,11 @@
 
 
 #include "EGPlayer.h"
-#include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
+#include "ExoGolf/Datas/Enums/MouseButtonPressed.h"
 #include "GameFramework/SpringArmComponent.h"
 
 //=======================================================================================|
@@ -66,7 +67,12 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	if(IA_MousePos)
 	{
-		EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetMousePos);
+		EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetCameraRotation);
+	}
+
+	if(IA_Scroll)
+	{
+		EIC->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &AEGPlayer::SetCameraDistance);
 	}
 }
 
@@ -116,49 +122,40 @@ void AEGPlayer::BeginPlay()
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : LeftClickStarted().");
-	
-	if(!EIC)
-	{
-		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
-		return;
-	}
+	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() + 1);
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : LeftClickStopped().");
-	
-	if(!EIC)
-	{
-		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
-		return;
-	}
+	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() - 1);
 }
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : RightClickStarted().");
-
-	if(!EIC)
-	{
-		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
-		return;
-	}
+	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() + 2);
 }
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : RightClickStopped().");
-	
-	if(!EIC)
-	{
-		GLog->Log(ELogVerbosity::Error, "AEGPlayer : LeftClickStarted() -> EIC is nullptr !");
-		return;
-	}
+	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() - 2);
 }
 
-void AEGPlayer::SetMousePos(const FInputActionValue& Value)
+void AEGPlayer::SetCameraRotation(const FInputActionValue& Value)
 {
-	MousePos = Value.Get<FVector2d>();
-	GLog->Log("AEGPlayer : SetMousePos() -> " + MousePos.ToString());
+	if(MouseButtonPressed == None)
+		return;
+
+	const FVector2D MouseDeltaPosition = Value.Get<FVector2D>();
+	GLog->Log("AEGPlayer : SetCameraRotation() -> MouseButtonPressed = " + FString::FromInt(MouseButtonPressed.GetIntValue()));
+	GLog->Log("AEGPlayer : SetCameraRotation() -> MouseDeltaPosition = " + MouseDeltaPosition.ToString());
+	const FRotator DeltaRotation = FRotator(MouseDeltaPosition.Y, MouseDeltaPosition.X, 0);
+	SpringArmComponent->AddRelativeRotation(DeltaRotation);
+}
+
+void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
+{
+	GLog->Log("AEGPlayer : SetMousePos() -> " + FString::SanitizeFloat(Value.Get<float>()));
 }
