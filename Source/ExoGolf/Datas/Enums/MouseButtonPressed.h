@@ -10,6 +10,5 @@ enum EMouseButtonPressed
 {
 	None,
 	LMB,
-	RMB,
-	Both
+	RMB
 };

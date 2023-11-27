@@ -2,6 +2,7 @@
 
 
 #include "EGPlayer.h"
+
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
@@ -38,7 +39,13 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	PlayerController = Cast<APlayerController>(GetController());
+	if(!PlayerController)
+	{
+		GLog->Log(ELogVerbosity::Error, "AEGPlayer : SetupPlayerInputComponent() -> PlayerController is nullptr !");
+		return;
+	}
+	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	Subsystem->ClearAllMappings();
 	Subsystem->AddMappingContext(InputMapping, 0);
@@ -113,6 +120,48 @@ void AEGPlayer::NonUniformMultiplyScale(float X, float Y, float Z)
 void AEGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(SpringArmComponent)
+		SpringArmComponent->TargetArmLength = CameraMaximumDistance;
+}
+
+//=======================================================================================|
+//==================================== METHODS ==========================================|
+//=======================================================================================|
+
+void AEGPlayer::RotateCamera(const FVector2D& MouseDelta) const
+{
+	const FRotator DeltaRotation = FRotator(MouseDelta.Y, MouseDelta.X, 0) * CameraSensitivity;
+	FRotator NewRotation = SpringArmComponent->GetRelativeRotation();
+	NewRotation.Add(DeltaRotation.Pitch, DeltaRotation.Yaw, DeltaRotation.Roll);
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, CameraMinimumPitch, CameraMaximumPitch);
+	SpringArmComponent->SetRelativeRotation(NewRotation);
+}
+
+void AEGPlayer::SetCursorVisibility(const bool IsVisible)
+{
+	if(!PlayerController)
+		return;
+	
+	const ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+	if(!LocalPlayer || !LocalPlayer->ViewportClient)
+		return;
+		
+	FViewport* Viewport = LocalPlayer->ViewportClient->Viewport;
+	if(!Viewport)
+		return;
+
+	// If visible, set mouse cursor position to previous position
+	if(IsVisible)
+	{
+		Viewport->SetMouse(MouseLastPos.X, MouseLastPos.Y);
+	}
+	else // Store mouse cursor position
+	{
+		Viewport->GetMousePos(MouseLastPos);
+	}
+	
+	PlayerController->SetShowMouseCursor(IsVisible);
 }
 
 //=======================================================================================|
@@ -122,25 +171,35 @@ void AEGPlayer::BeginPlay()
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : LeftClickStarted().");
-	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() + 1);
+	MouseButtonPressed = LMB;
+	SetCursorVisibility(false);
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : LeftClickStopped().");
-	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() - 1);
+	if(MouseButtonPressed == LMB)
+	{
+		MouseButtonPressed = None;
+		SetCursorVisibility(true);
+	}
 }
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : RightClickStarted().");
-	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() + 2);
+	MouseButtonPressed = RMB;
+	SetCursorVisibility(false);
 }
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
 	GLog->Log("AEGPlayer : RightClickStopped().");
-	MouseButtonPressed = TEnumAsByte<EMouseButtonPressed>(MouseButtonPressed.GetIntValue() - 2);
+	if(MouseButtonPressed == RMB)
+	{
+		MouseButtonPressed = None;
+		SetCursorVisibility(true);
+	}
 }
 
 void AEGPlayer::SetCameraRotation(const FInputActionValue& Value)
@@ -149,13 +208,25 @@ void AEGPlayer::SetCameraRotation(const FInputActionValue& Value)
 		return;
 
 	const FVector2D MouseDeltaPosition = Value.Get<FVector2D>();
-	GLog->Log("AEGPlayer : SetCameraRotation() -> MouseButtonPressed = " + FString::FromInt(MouseButtonPressed.GetIntValue()));
-	GLog->Log("AEGPlayer : SetCameraRotation() -> MouseDeltaPosition = " + MouseDeltaPosition.ToString());
-	const FRotator DeltaRotation = FRotator(MouseDeltaPosition.Y, MouseDeltaPosition.X, 0);
-	SpringArmComponent->AddRelativeRotation(DeltaRotation);
+
+	if(MouseButtonPressed == RMB)
+	{
+		RotateCamera(MouseDeltaPosition);
+	}
+	else if(MouseButtonPressed == LMB)
+	{
+		GLog->Log("AEGPlayer : SetCameraRotation() -> MouseDeltaPosition = " + MouseDeltaPosition.ToString());
+	}
 }
 
 void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
 {
-	GLog->Log("AEGPlayer : SetMousePos() -> " + FString::SanitizeFloat(Value.Get<float>()));
+	if(!SpringArmComponent)
+		return;
+
+	const float Delta = Value.Get<float>() * ScrollSensitivity;
+	SpringArmComponent->TargetArmLength = FMath::Clamp(
+		SpringArmComponent->TargetArmLength + Delta,
+		CameraMinimumDistance,
+		CameraMaximumDistance);
 }

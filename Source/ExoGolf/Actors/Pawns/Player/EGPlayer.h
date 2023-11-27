@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
 #include "ExoGolf/ExosDeJerome/Scalable.h"
+#include "GameFramework/Pawn.h"
 #include "EGPlayer.generated.h"
 
 enum EMouseButtonPressed : int;
@@ -49,14 +49,23 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
 	FColor MaximumForceColor = FColor::Red;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera", meta=(UIMin = 0.f, UIMax = 1.f))
 	float CameraSensitivity = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera", meta=(UIMin = 0.f, UIMax = 100.f))
+	float ScrollSensitivity = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
 	float CameraMinimumDistance = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
 	float CameraMaximumDistance = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	float CameraMinimumPitch = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera")
+	float CameraMaximumPitch = 90.f;
 
 	//==== Components ====
 
@@ -94,9 +103,11 @@ private:
 	
 	//==== Fields ====
 
-	uint32 LMBMousePosEventHandle = 0;
-	uint32 RMBMousePosEventHandle = 0;
+	FIntPoint MouseLastPos = FIntPoint::ZeroValue;
 	TEnumAsByte<EMouseButtonPressed> MouseButtonPressed;
+
+	UPROPERTY()
+	APlayerController* PlayerController;
 	
 public:
 	AEGPlayer();
@@ -113,6 +124,11 @@ private:
 	//==== Overrides ====
 	
 	virtual void BeginPlay() override;
+
+	//==== Methods ====
+
+	void RotateCamera(const FVector2D& MouseDelta) const;
+	void SetCursorVisibility(const bool IsVisible);
 	
 	//==== Input Handlers ====
 	
