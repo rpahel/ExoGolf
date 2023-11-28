@@ -7,8 +7,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
-#include "ExoGolf/Datas/Enums/MouseButtonPressed.h"
+#include "ExoGolf/Actors/Others/EGForceGauge.h"
+#include "ExoGolf/Datas/Enums.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "DrawDebugHelpers.h"
 
 //=======================================================================================|
 //===================================== PUBLIC ==========================================|
@@ -45,6 +47,8 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : SetupPlayerInputComponent() -> PlayerController is nullptr !");
 		return;
 	}
+
+	PlayerController->SetInputMode(FInputModeGameAndUI());
 	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	Subsystem->ClearAllMappings();
@@ -121,6 +125,8 @@ void AEGPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	World = GetWorld();
+
 	if(SpringArmComponent)
 		SpringArmComponent->TargetArmLength = CameraMaximumDistance;
 }
@@ -155,13 +161,57 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 	if(IsVisible)
 	{
 		Viewport->SetMouse(MouseLastPos.X, MouseLastPos.Y);
+		PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 	else // Store mouse cursor position
 	{
 		Viewport->GetMousePos(MouseLastPos);
+		PlayerController->SetInputMode(FInputModeGameOnly());
 	}
 	
 	PlayerController->SetShowMouseCursor(IsVisible);
+}
+
+void AEGPlayer::SpawnForceGauge()
+{
+	const TTuple<FVector, FVector> WorldMousePositionAndDirection = GetWorldMousePositionAndDirection();
+	const FVector ProjectedMousePosition = GetProjectedMousePosition(
+		WorldMousePositionAndDirection.Get<0>(),
+		WorldMousePositionAndDirection.Get<1>());
+
+	if(bDebugMode)
+		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
+	
+	FRotator ForceGaugeDesiredRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
+
+	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
+	SpawnParams.Owner = this;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	CurrentForceGauge = World->SpawnActor<AEGForceGauge>(ForceGauge, GetActorLocation(), ForceGaugeDesiredRotation, SpawnParams);
+}
+
+FRotator AEGPlayer::GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition)
+{
+	const FVector BallToMousePos = ProjectedMousePosition - GetActorLocation();
+	FRotator ToMousePosRotation = BallToMousePos.Rotation();
+	ToMousePosRotation.Pitch = 0;
+	return ToMousePosRotation;
+}
+
+FVector AEGPlayer::GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection)
+{
+	FHitResult HitResult;
+	World->LineTraceSingleByChannel(HitResult, MousePosition, 100000000 * MouseDirection, ECC_WorldStatic);
+	return HitResult.Location;
+}
+
+TTuple<FVector, FVector> AEGPlayer::GetWorldMousePositionAndDirection() const
+{
+	FVector Location;
+	FVector Direction;
+	PlayerController->DeprojectMousePositionToWorld(Location, Direction);
+	return TTuple<FVector, FVector>(Location, Direction);
 }
 
 //=======================================================================================|
@@ -170,14 +220,20 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
-	GLog->Log("AEGPlayer : LeftClickStarted().");
 	MouseButtonPressed = LMB;
 	SetCursorVisibility(false);
+
+	if(World == nullptr || ForceGauge == nullptr)
+		return;
+
+	if(!ForceGauge)
+		return;
+
+	SpawnForceGauge();
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
-	GLog->Log("AEGPlayer : LeftClickStopped().");
 	if(MouseButtonPressed == LMB)
 	{
 		MouseButtonPressed = None;
@@ -187,14 +243,12 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
-	GLog->Log("AEGPlayer : RightClickStarted().");
 	MouseButtonPressed = RMB;
 	SetCursorVisibility(false);
 }
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
-	GLog->Log("AEGPlayer : RightClickStopped().");
 	if(MouseButtonPressed == RMB)
 	{
 		MouseButtonPressed = None;

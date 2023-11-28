@@ -18,30 +18,11 @@ AEGForceGauge::AEGForceGauge()
 		SetRootComponent(SplineMesh);
 }
 
-void AEGForceGauge::SetColor(const FColor& Color)
+void AEGForceGauge::SetForce(float Length)
 {
-	if(!SplineMesh)
-	{
-		GLog->Log(ELogVerbosity::Error, "AForceGauge : SetColor() -> SplineMesh is nullptr !");
-		return;
-	}
 }
 
-void AEGForceGauge::SetLength(float Length)
+void AEGForceGauge::SetRotation(const FRotator& Rotation)
 {
-	if(!SplineMesh)
-	{
-		GLog->Log(ELogVerbosity::Error, "AForceGauge : SetLength() -> SplineMesh is nullptr !");
-		return;
-	}
-}
-
-void AEGForceGauge::AddRotation(float Delta)
-{
-	if(!SplineMesh)
-	{
-		GLog->Log(ELogVerbosity::Error, "AForceGauge : AddRotation() -> SplineMesh is nullptr !");
-		return;
-	}
 }
 

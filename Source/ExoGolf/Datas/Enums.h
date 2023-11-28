@@ -2,9 +2,6 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "MouseButtonPressed.generated.h"
-
 UENUM()
 enum EMouseButtonPressed
 {

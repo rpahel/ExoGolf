@@ -10,6 +10,7 @@
 enum EMouseButtonPressed : int;
 struct FInputActionValue;
 
+class AEGForceGauge;
 class UInputAction;
 class UInputMappingContext;
 class USphereComponent;
@@ -24,7 +25,13 @@ class EXOGOLF_API AEGPlayer : public APawn, public IScalable
 
 private:
 	//==== Exposed Fields ====
+	UPROPERTY(EditDefaultsOnly, Category = "Debug")
+	bool bDebugMode = false;
 
+	// The force gauge to show the strike force of the player.
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	TSubclassOf<AEGForceGauge> ForceGauge = nullptr;
+	
 	// The minimum distance the player has to pull back its cursor to be considered a strike.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
 	float MinimumStrikeDistance = 0.f;
@@ -33,10 +40,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
 	float MinimumForce = 1.f;
 
-	// Color representing minimum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
-	FColor MinimumForceColor = FColor::Green;
-
 	// The distance the player needs to pull back its cursor to strike the ball with maximum force.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
 	float MaximumStrikeDistance = 100.f;
@@ -44,10 +47,6 @@ private:
 	// The impulse force applied to the ball at maximum strike distance.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
 	float MaximumForce = 100.f;
-
-	// Color representing maximum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
-	FColor MaximumForceColor = FColor::Red;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Camera", meta=(UIMin = 0.f, UIMax = 1.f))
 	float CameraSensitivity = 1.f;
@@ -103,11 +102,19 @@ private:
 	
 	//==== Fields ====
 
+	float CurrentStrikeForce = 0;
+	FVector LastPosition = FVector::Zero();
 	FIntPoint MouseLastPos = FIntPoint::ZeroValue;
 	TEnumAsByte<EMouseButtonPressed> MouseButtonPressed;
 
 	UPROPERTY()
+	UWorld* World = nullptr;
+	
+	UPROPERTY()
 	APlayerController* PlayerController;
+
+	UPROPERTY()
+	AEGForceGauge* CurrentForceGauge = nullptr;
 	
 public:
 	AEGPlayer();
@@ -129,6 +136,10 @@ private:
 
 	void RotateCamera(const FVector2D& MouseDelta) const;
 	void SetCursorVisibility(const bool IsVisible);
+	void SpawnForceGauge();
+	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition);
+	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection);
+	TTuple<FVector, FVector> GetWorldMousePositionAndDirection() const;
 	
 	//==== Input Handlers ====
 	
