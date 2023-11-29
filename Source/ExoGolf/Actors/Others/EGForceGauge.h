@@ -25,20 +25,25 @@ private:
 	FColor MinimumForceColor = FColor::Green;
 
 	// Spline mesh's end scale at maximum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
 	float MaximumForceSplineMeshScale = 1.f;
 	
 	// Color representing maximum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
+	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
 	FColor MaximumForceColor = FColor::Red;
 	
 	//==== Components ====
 
 	UPROPERTY(VisibleAnywhere)
 	USplineMeshComponent* SplineMesh;
+
+	//==== Hidden Fields ===
+
+	float MinimumLength = -1.f;
+	float MaximumLength = -1.f;
 	
 public:
 	AEGForceGauge();
-	void SetForce(float Length);
-	void SetRotation(const FRotator& Rotation);
+	void SetForce(float NormalizedLength);
+	void SetMinAndMaxLength(float Minimum, float Maximum);
 };

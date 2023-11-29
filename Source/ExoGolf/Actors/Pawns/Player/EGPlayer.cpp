@@ -10,7 +10,11 @@
 #include "ExoGolf/Actors/Others/EGForceGauge.h"
 #include "ExoGolf/Datas/Enums.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#if WITH_EDITOR
 #include "DrawDebugHelpers.h"
+#endif
 
 //=======================================================================================|
 //===================================== PUBLIC ==========================================|
@@ -78,7 +82,7 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	if(IA_MousePos)
 	{
-		EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::SetCameraRotation);
+		EIC->BindAction(IA_MousePos, ETriggerEvent::Triggered, this, &AEGPlayer::MousePositionChanged);
 	}
 
 	if(IA_Scroll)
@@ -172,26 +176,44 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 	PlayerController->SetShowMouseCursor(IsVisible);
 }
 
-void AEGPlayer::SpawnForceGauge()
+TObjectPtr<AEGForceGauge> AEGPlayer::SpawnForceGauge()
 {
+	const FVector BallPosition = GetActorLocation();
 	const TTuple<FVector, FVector> WorldMousePositionAndDirection = GetWorldMousePositionAndDirection();
-	const FVector ProjectedMousePosition = GetProjectedMousePosition(
-		WorldMousePositionAndDirection.Get<0>(),
-		WorldMousePositionAndDirection.Get<1>());
+	const FVector ProjectedMousePosition = GetProjectedMousePosition(WorldMousePositionAndDirection.Get<0>(), WorldMousePositionAndDirection.Get<1>());
 
+#if WITH_EDITOR
 	if(bDebugMode)
 		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
+#endif
 	
-	FRotator ForceGaugeDesiredRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
+	const FRotator ForceGaugeDesiredRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
 
 	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
-	SpawnParams.Owner = this;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// Set CurrentStrikeForce and ForceGaugeLength;
+	const float MousePositionDistance = ProjectedMousePosition.Length();
+	const float StrikeDistance = UKismetMathLibrary::NormalizeToRange(MousePositionDistance, MinimumStrikeDistance, MaximumStrikeDistance);
+	CurrentStrikeForce = StrikeDistance * MaximumForce;
+	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, MinimumForce, MaximumForce);
 	
-	CurrentForceGauge = World->SpawnActor<AEGForceGauge>(ForceGauge, GetActorLocation(), ForceGaugeDesiredRotation, SpawnParams);
+#if WITH_EDITOR
+	if(bDebugMode)
+		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
+#endif
+
+	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
+	ForceGaugePtr->SetMinAndMaxLength(MinimumStrikeDistance, MaximumStrikeDistance);
+
+	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumStrikeDistance, MaximumStrikeDistance);
+
+	ForceGaugePtr->SetForce(NormalizedForce);
+	
+	return ForceGaugePtr;
 }
 
-FRotator AEGPlayer::GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition)
+FRotator AEGPlayer::GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition) const
 {
 	const FVector BallToMousePos = ProjectedMousePosition - GetActorLocation();
 	FRotator ToMousePosRotation = BallToMousePos.Rotation();
@@ -199,11 +221,26 @@ FRotator AEGPlayer::GetForceGaugeDesiredRotation(const FVector& ProjectedMousePo
 	return ToMousePosRotation;
 }
 
-FVector AEGPlayer::GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection)
+FVector AEGPlayer::GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const
 {
 	FHitResult HitResult;
-	World->LineTraceSingleByChannel(HitResult, MousePosition, 100000000 * MouseDirection, ECC_WorldStatic);
-	return HitResult.Location;
+	const float BallZPos = GetActorLocation().Z;
+	const FVector MissLocationRaw = MousePosition + 100000000 * MouseDirection;
+	
+	PlayerController->GetHitResultUnderCursor(ECC_WorldStatic, false, HitResult);
+
+	// Bring cursor hit position to the same plane as the ball.
+	const FVector HitLocation = FVector(
+		HitResult.Location.X,
+		HitResult.Location.Y,
+		BallZPos);
+	
+	const FVector MissLocation = FVector(
+		MissLocationRaw.X,
+		MissLocationRaw.Y,
+		BallZPos);
+	
+	return HitResult.bBlockingHit ? HitLocation : MissLocation;
 }
 
 TTuple<FVector, FVector> AEGPlayer::GetWorldMousePositionAndDirection() const
@@ -229,7 +266,8 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 	if(!ForceGauge)
 		return;
 
-	SpawnForceGauge();
+	if(!CurrentForceGauge)
+		CurrentForceGauge = SpawnForceGauge();
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
@@ -239,12 +277,28 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 		MouseButtonPressed = None;
 		SetCursorVisibility(true);
 	}
+
+	if(CurrentForceGauge)
+	{
+		CurrentForceGauge->Destroy();
+		CurrentForceGauge = nullptr;
+	}
+
+	CurrentStrikeForce = 0;
 }
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
 	MouseButtonPressed = RMB;
 	SetCursorVisibility(false);
+
+	if(CurrentForceGauge)
+	{
+		CurrentForceGauge->Destroy();
+		CurrentForceGauge = nullptr;
+	}
+
+	CurrentStrikeForce = 0;
 }
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
@@ -256,7 +310,7 @@ void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 	}
 }
 
-void AEGPlayer::SetCameraRotation(const FInputActionValue& Value)
+void AEGPlayer::MousePositionChanged(const FInputActionValue& Value)
 {
 	if(MouseButtonPressed == None)
 		return;
@@ -267,9 +321,13 @@ void AEGPlayer::SetCameraRotation(const FInputActionValue& Value)
 	{
 		RotateCamera(MouseDeltaPosition);
 	}
-	else if(MouseButtonPressed == LMB)
+	else if(MouseButtonPressed == LMB && CurrentForceGauge)
 	{
-		GLog->Log("AEGPlayer : SetCameraRotation() -> MouseDeltaPosition = " + MouseDeltaPosition.ToString());
+		const FRotator DeltaRot = FRotator(0, -MouseDeltaPosition.X, 0);
+		const float DeltaForce = -MouseDeltaPosition.Y;
+		CurrentForceGauge->AddActorWorldRotation(DeltaRot);
+		CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce + DeltaForce, MinimumForce, MaximumForce);
+		CurrentForceGauge->SetForce(UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumForce, MaximumForce));
 	}
 }
 

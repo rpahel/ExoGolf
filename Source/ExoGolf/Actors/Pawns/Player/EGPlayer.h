@@ -25,8 +25,11 @@ class EXOGOLF_API AEGPlayer : public APawn, public IScalable
 
 private:
 	//==== Exposed Fields ====
+
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditDefaultsOnly, Category = "Debug")
 	bool bDebugMode = false;
+#endif
 
 	// The force gauge to show the strike force of the player.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
@@ -136,9 +139,9 @@ private:
 
 	void RotateCamera(const FVector2D& MouseDelta) const;
 	void SetCursorVisibility(const bool IsVisible);
-	void SpawnForceGauge();
-	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition);
-	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection);
+	TObjectPtr<AEGForceGauge> SpawnForceGauge();
+	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const;
+	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition) const;
 	TTuple<FVector, FVector> GetWorldMousePositionAndDirection() const;
 	
 	//==== Input Handlers ====
@@ -156,7 +159,7 @@ private:
 	void RightClickStopped(const FInputActionValue& Value);
 
 	UFUNCTION()
-	void SetCameraRotation(const FInputActionValue& Value);
+	void MousePositionChanged(const FInputActionValue& Value);
 
 	UFUNCTION()
 	void SetCameraDistance(const FInputActionValue& Value);
