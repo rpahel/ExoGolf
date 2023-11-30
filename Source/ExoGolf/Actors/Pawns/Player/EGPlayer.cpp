@@ -9,6 +9,7 @@
 #include "Components/SphereComponent.h"
 #include "ExoGolf/Actors/Others/EGForceGauge.h"
 #include "ExoGolf/Datas/Enums.h"
+#include "ExoGolf/Datas/Data_Assets/PlayerData.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -130,7 +131,7 @@ void AEGPlayer::BeginPlay()
 	World = GetWorld();
 
 	if(SpringArmComponent)
-		SpringArmComponent->TargetArmLength = CameraMaximumDistance;
+		SpringArmComponent->TargetArmLength = PlayerData->CameraMaximumDistance;
 }
 
 //=======================================================================================|
@@ -144,17 +145,17 @@ void AEGPlayer::UpdateForceGauge()
 	const FRotator ForceGaugeRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
 	CurrentForceGauge->SetActorRotation(ForceGaugeRotation);
 	float BallToMouseDistance = (ProjectedMousePosition - GetActorLocation()).Length();
-	BallToMouseDistance = UKismetMathLibrary::NormalizeToRange(BallToMouseDistance, MinimumStrikeDistance, MaximumStrikeDistance);
-	CurrentStrikeForce = FMath::Clamp(BallToMouseDistance * MaximumForce, MinimumForce, MaximumForce);
-	CurrentForceGauge->SetForce(UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumForce, MaximumForce));
+	BallToMouseDistance = UKismetMathLibrary::NormalizeToRange(BallToMouseDistance, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
+	CurrentStrikeForce = FMath::Clamp(BallToMouseDistance * PlayerData->MaximumForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
+	CurrentForceGauge->SetForce(UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce));
 }
 
 void AEGPlayer::RotateCamera(const FVector2D& MouseDelta) const
 {
-	const FRotator DeltaRotation = FRotator(MouseDelta.Y, MouseDelta.X, 0) * CameraSensitivity;
+	const FRotator DeltaRotation = FRotator(MouseDelta.Y, MouseDelta.X, 0) * PlayerData->CameraSensitivity;
 	FRotator NewRotation = SpringArmComponent->GetRelativeRotation();
 	NewRotation.Add(DeltaRotation.Pitch, DeltaRotation.Yaw, DeltaRotation.Roll);
-	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, CameraMinimumPitch, CameraMaximumPitch);
+	NewRotation.Pitch = FMath::Clamp(NewRotation.Pitch, PlayerData->CameraMinimumPitch, PlayerData->CameraMaximumPitch);
 	SpringArmComponent->SetRelativeRotation(NewRotation);
 }
 
@@ -202,19 +203,19 @@ AEGForceGauge* AEGPlayer::SpawnForceGauge()
 
 	// Set CurrentStrikeForce and ForceGaugeLength;
 	const float MousePositionDistance = ProjectedMousePosition.Length();
-	const float StrikeDistance = UKismetMathLibrary::NormalizeToRange(MousePositionDistance, MinimumStrikeDistance, MaximumStrikeDistance);
-	CurrentStrikeForce = StrikeDistance * MaximumForce;
-	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, MinimumForce, MaximumForce);
+	const float StrikeDistance = UKismetMathLibrary::NormalizeToRange(MousePositionDistance, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
+	CurrentStrikeForce = StrikeDistance * PlayerData->MaximumForce;
+	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
 	
 #if WITH_EDITOR
 	if(bDebugMode)
 		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
 #endif
 
-	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
-	ForceGaugePtr->SetMinAndMaxLength(MinimumStrikeDistance, MaximumStrikeDistance);
+	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
+	ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
 
-	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumStrikeDistance, MaximumStrikeDistance);
+	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
 
 	ForceGaugePtr->SetForce(NormalizedForce);
 	
@@ -268,10 +269,10 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 	MouseButtonPressed = EMouseButtonPressed::LMB;
 	SetCursorVisibility(false);
 
-	if(World == nullptr || ForceGauge == nullptr)
+	if(World == nullptr || PlayerData->ForceGauge == nullptr)
 		return;
 
-	if(!ForceGauge)
+	if(!PlayerData->ForceGauge)
 		return;
 
 	if(!CurrentForceGauge)
@@ -288,6 +289,8 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 
 	if(CurrentForceGauge)
 	{
+		const FVector Direction = -CurrentStrikeForce * CurrentForceGauge->GetActorRotation().Vector();
+		SphereComponent->AddImpulse(Direction, NAME_None, true);
 		CurrentForceGauge->Destroy();
 		CurrentForceGauge = nullptr;
 	}
@@ -340,9 +343,9 @@ void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
 	if(!SpringArmComponent)
 		return;
 
-	const float Delta = Value.Get<float>() * ScrollSensitivity;
+	const float Delta = Value.Get<float>() * PlayerData->ScrollSensitivity;
 	SpringArmComponent->TargetArmLength = FMath::Clamp(
 		SpringArmComponent->TargetArmLength + Delta,
-		CameraMinimumDistance,
-		CameraMaximumDistance);
+		PlayerData->CameraMinimumDistance,
+		PlayerData->CameraMaximumDistance);
 }
