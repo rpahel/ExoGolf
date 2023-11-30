@@ -7,7 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "EGPlayer.generated.h"
 
-enum EMouseButtonPressed : int;
+enum class EMouseButtonPressed;
 struct FInputActionValue;
 
 class AEGForceGauge;
@@ -108,7 +108,7 @@ private:
 	float CurrentStrikeForce = 0;
 	FVector LastPosition = FVector::Zero();
 	FIntPoint MouseLastPos = FIntPoint::ZeroValue;
-	TEnumAsByte<EMouseButtonPressed> MouseButtonPressed;
+	EMouseButtonPressed MouseButtonPressed;
 
 	UPROPERTY()
 	UWorld* World = nullptr;
@@ -137,12 +137,13 @@ private:
 
 	//==== Methods ====
 
+	void UpdateForceGauge();
 	void RotateCamera(const FVector2D& MouseDelta) const;
 	void SetCursorVisibility(const bool IsVisible);
-	TObjectPtr<AEGForceGauge> SpawnForceGauge();
 	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const;
 	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition) const;
 	TTuple<FVector, FVector> GetWorldMousePositionAndDirection() const;
+	AEGForceGauge* SpawnForceGauge();
 	
 	//==== Input Handlers ====
 	

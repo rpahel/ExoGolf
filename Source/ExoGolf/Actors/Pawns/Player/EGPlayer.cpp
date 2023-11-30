@@ -51,8 +51,6 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		GLog->Log(ELogVerbosity::Error, "AEGPlayer : SetupPlayerInputComponent() -> PlayerController is nullptr !");
 		return;
 	}
-
-	PlayerController->SetInputMode(FInputModeGameAndUI());
 	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	Subsystem->ClearAllMappings();
@@ -139,6 +137,18 @@ void AEGPlayer::BeginPlay()
 //==================================== METHODS ==========================================|
 //=======================================================================================|
 
+void AEGPlayer::UpdateForceGauge()
+{
+	const TTuple<FVector, FVector> MousePosAndDir = GetWorldMousePositionAndDirection();
+	const FVector ProjectedMousePosition = GetProjectedMousePosition(MousePosAndDir.Get<0>(), MousePosAndDir.Get<1>());
+	const FRotator ForceGaugeRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
+	CurrentForceGauge->SetActorRotation(ForceGaugeRotation);
+	float BallToMouseDistance = (ProjectedMousePosition - GetActorLocation()).Length();
+	BallToMouseDistance = UKismetMathLibrary::NormalizeToRange(BallToMouseDistance, MinimumStrikeDistance, MaximumStrikeDistance);
+	CurrentStrikeForce = FMath::Clamp(BallToMouseDistance * MaximumForce, MinimumForce, MaximumForce);
+	CurrentForceGauge->SetForce(UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumForce, MaximumForce));
+}
+
 void AEGPlayer::RotateCamera(const FVector2D& MouseDelta) const
 {
 	const FRotator DeltaRotation = FRotator(MouseDelta.Y, MouseDelta.X, 0) * CameraSensitivity;
@@ -165,18 +175,16 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 	if(IsVisible)
 	{
 		Viewport->SetMouse(MouseLastPos.X, MouseLastPos.Y);
-		PlayerController->SetInputMode(FInputModeGameAndUI());
 	}
 	else // Store mouse cursor position
 	{
 		Viewport->GetMousePos(MouseLastPos);
-		PlayerController->SetInputMode(FInputModeGameOnly());
 	}
 	
 	PlayerController->SetShowMouseCursor(IsVisible);
 }
 
-TObjectPtr<AEGForceGauge> AEGPlayer::SpawnForceGauge()
+AEGForceGauge* AEGPlayer::SpawnForceGauge()
 {
 	const FVector BallPosition = GetActorLocation();
 	const TTuple<FVector, FVector> WorldMousePositionAndDirection = GetWorldMousePositionAndDirection();
@@ -257,7 +265,7 @@ TTuple<FVector, FVector> AEGPlayer::GetWorldMousePositionAndDirection() const
 
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
-	MouseButtonPressed = LMB;
+	MouseButtonPressed = EMouseButtonPressed::LMB;
 	SetCursorVisibility(false);
 
 	if(World == nullptr || ForceGauge == nullptr)
@@ -272,9 +280,9 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
-	if(MouseButtonPressed == LMB)
+	if(MouseButtonPressed == EMouseButtonPressed::LMB)
 	{
-		MouseButtonPressed = None;
+		MouseButtonPressed = EMouseButtonPressed::None;
 		SetCursorVisibility(true);
 	}
 
@@ -289,7 +297,7 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
-	MouseButtonPressed = RMB;
+	MouseButtonPressed = EMouseButtonPressed::RMB;
 	SetCursorVisibility(false);
 
 	if(CurrentForceGauge)
@@ -303,31 +311,27 @@ void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
-	if(MouseButtonPressed == RMB)
+	if(MouseButtonPressed == EMouseButtonPressed::RMB)
 	{
-		MouseButtonPressed = None;
+		MouseButtonPressed = EMouseButtonPressed::None;
 		SetCursorVisibility(true);
 	}
 }
 
 void AEGPlayer::MousePositionChanged(const FInputActionValue& Value)
 {
-	if(MouseButtonPressed == None)
+	if(MouseButtonPressed == EMouseButtonPressed::None)
 		return;
 
 	const FVector2D MouseDeltaPosition = Value.Get<FVector2D>();
 
-	if(MouseButtonPressed == RMB)
+	if(MouseButtonPressed == EMouseButtonPressed::RMB)
 	{
 		RotateCamera(MouseDeltaPosition);
 	}
-	else if(MouseButtonPressed == LMB && CurrentForceGauge)
+	else if(MouseButtonPressed == EMouseButtonPressed::LMB && CurrentForceGauge)
 	{
-		const FRotator DeltaRot = FRotator(0, -MouseDeltaPosition.X, 0);
-		const float DeltaForce = -MouseDeltaPosition.Y;
-		CurrentForceGauge->AddActorWorldRotation(DeltaRot);
-		CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce + DeltaForce, MinimumForce, MaximumForce);
-		CurrentForceGauge->SetForce(UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, MinimumForce, MaximumForce));
+		UpdateForceGauge();
 	}
 }
 

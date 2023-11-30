@@ -30,10 +30,8 @@ void AEGForceGauge::SetForce(float NormalizedLength)
 	}
 
 	// Set SplineMesh color
-	UMaterialInstanceDynamic* Mat = UMaterialInstanceDynamic::Create(SplineMesh->GetMaterial(0), SplineMesh);
 	const FLinearColor MeshColor = FLinearColor::LerpUsingHSV(MinimumForceColor, MaximumForceColor, NormalizedLength);
-	Mat->SetVectorParameterValue(FName("Color"), MeshColor);
-	SplineMesh->SetMaterial(0, Mat);
+	DynMat->SetVectorParameterValue(FName(TEXT("Color")), MeshColor);
 
 	// Set Spline length
 	const float Length = FMath::Lerp(MinimumLength, MaximumLength, NormalizedLength);
@@ -50,4 +48,20 @@ void AEGForceGauge::SetMinAndMaxLength(float Minimum, float Maximum)
 {
 	MinimumLength = Minimum;
 	MaximumLength = Maximum;
+}
+
+//=======================================================================================|
+//=================================== OVERRIDES =========================================|
+//=======================================================================================|
+
+void AEGForceGauge::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if(SplineMesh && SplineMesh->GetMaterial(0))
+	{
+		UMaterialInstance* Mat = Cast<UMaterialInstance>(SplineMesh->GetMaterial(0));
+		DynMat = UMaterialInstanceDynamic::Create(Mat, SplineMesh);
+		SplineMesh->SetMaterial(0, DynMat);
+	}
 }

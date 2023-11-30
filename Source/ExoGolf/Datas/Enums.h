@@ -3,7 +3,7 @@
 #pragma once
 
 UENUM()
-enum EMouseButtonPressed
+enum class EMouseButtonPressed
 {
 	None,
 	LMB,

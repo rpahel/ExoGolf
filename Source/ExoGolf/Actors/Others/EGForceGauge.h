@@ -41,9 +41,17 @@ private:
 
 	float MinimumLength = -1.f;
 	float MaximumLength = -1.f;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynMat;
 	
 public:
 	AEGForceGauge();
 	void SetForce(float NormalizedLength);
 	void SetMinAndMaxLength(float Minimum, float Maximum);
+
+private:
+	//==== Overrides ====
+	
+	virtual void BeginPlay() override;
 };
