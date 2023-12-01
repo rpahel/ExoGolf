@@ -193,7 +193,7 @@ AEGForceGauge* AEGPlayer::SpawnForceGauge()
 
 #if WITH_EDITOR
 	if(bDebugMode)
-		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
+		DrawDebugSphere(World, ProjectedMousePosition, 2, 16, FColor::Red, false, 3);
 #endif
 	
 	const FRotator ForceGaugeDesiredRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
@@ -206,11 +206,6 @@ AEGForceGauge* AEGPlayer::SpawnForceGauge()
 	const float StrikeDistance = UKismetMathLibrary::NormalizeToRange(MousePositionDistance, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
 	CurrentStrikeForce = StrikeDistance * PlayerData->MaximumForce;
 	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
-	
-#if WITH_EDITOR
-	if(bDebugMode)
-		DrawDebugSphere(World, ProjectedMousePosition, 50, 32, FColor::Red, false, 3);
-#endif
 
 	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
 	ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
@@ -232,24 +227,30 @@ FRotator AEGPlayer::GetForceGaugeDesiredRotation(const FVector& ProjectedMousePo
 
 FVector AEGPlayer::GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const
 {
-	FHitResult HitResult;
-	const float BallZPos = GetActorLocation().Z;
-	const FVector MissLocationRaw = MousePosition + 100000000 * MouseDirection;
+	const FVector BallLocation = GetActorLocation();
+	const FPlane XYPlane = FPlane(BallLocation, FVector::UpVector);
+	FVector ProjectedMousePosition;
 	
-	PlayerController->GetHitResultUnderCursor(ECC_WorldStatic, false, HitResult);
+	if(MouseDirection.Z >= 0) // Click direction is parallel or going away from the plane.
+	{
+		ProjectedMousePosition = MousePosition + 100000000 * MouseDirection;
+		ProjectedMousePosition.Z = BallLocation.Z;
+	}
+	else
+	{
+		ProjectedMousePosition = FMath::RayPlaneIntersection(MousePosition, MouseDirection, XYPlane);
+	}
 
-	// Bring cursor hit position to the same plane as the ball.
-	const FVector HitLocation = FVector(
-		HitResult.Location.X,
-		HitResult.Location.Y,
-		BallZPos);
-	
-	const FVector MissLocation = FVector(
-		MissLocationRaw.X,
-		MissLocationRaw.Y,
-		BallZPos);
-	
-	return HitResult.bBlockingHit ? HitLocation : MissLocation;
+#if WITH_EDITOR
+	if(bDebugMode)
+	{
+		DrawDebugSphere(World, MousePosition, 2, 16, FColor::Green, false, 2);
+		DrawDebugLine(World, MousePosition, MousePosition + MouseDirection * 10000, FColor::Blue, false, 2);
+		DrawDebugSphere(World, ProjectedMousePosition, 2, 16, FColor::Red, false, 2);
+	}
+#endif
+
+	return ProjectedMousePosition;
 }
 
 TTuple<FVector, FVector> AEGPlayer::GetWorldMousePositionAndDirection() const

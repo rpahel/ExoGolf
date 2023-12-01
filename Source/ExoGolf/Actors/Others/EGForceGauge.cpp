@@ -4,6 +4,7 @@
 #include "EGForceGauge.h"
 
 #include "Components/SplineMeshComponent.h"
+#include "ExoGolf/Datas/Data_Assets/ForceGaugeData.h"
 
 //=======================================================================================|
 //===================================== PUBLIC ==========================================|
@@ -30,7 +31,7 @@ void AEGForceGauge::SetForce(float NormalizedLength)
 	}
 
 	// Set SplineMesh color
-	const FLinearColor MeshColor = FLinearColor::LerpUsingHSV(MinimumForceColor, MaximumForceColor, NormalizedLength);
+	const FLinearColor MeshColor = FLinearColor::LerpUsingHSV(ForceGaugeData->MinimumForceColor, ForceGaugeData->MaximumForceColor, NormalizedLength);
 	DynMat->SetVectorParameterValue(FName(TEXT("Color")), MeshColor);
 
 	// Set Spline length
@@ -39,7 +40,7 @@ void AEGForceGauge::SetForce(float NormalizedLength)
 
 	// Set Spline mesh end scale
 	const FVector2D EndScale = FVector2D(
-		FMath::Lerp(MinimumForceSplineMeshScale, MaximumForceSplineMeshScale, NormalizedLength),
+		FMath::Lerp(ForceGaugeData->MinimumForceSplineMeshScale, ForceGaugeData->MaximumForceSplineMeshScale, NormalizedLength),
 		1);
 	SplineMesh->SetEndScale(EndScale);
 }

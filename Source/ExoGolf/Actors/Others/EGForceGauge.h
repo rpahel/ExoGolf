@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "EGForceGauge.generated.h"
 
+class UForceGaugeData;
 class USplineMeshComponent;
 
 UCLASS()
@@ -16,21 +17,8 @@ class EXOGOLF_API AEGForceGauge : public AActor
 private:
 	//==== Exposed Fields ====
 
-	// Spline mesh's end scale at minimum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
-	float MinimumForceSplineMeshScale = 0.1f;
-
-	// Color representing minimum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
-	FColor MinimumForceColor = FColor::Green;
-
-	// Spline mesh's end scale at maximum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
-	float MaximumForceSplineMeshScale = 1.f;
-	
-	// Color representing maximum force.
-	UPROPERTY(EditDefaultsOnly, Category = "Appearance|Strike")
-	FColor MaximumForceColor = FColor::Red;
+	UPROPERTY(EditAnywhere, Category = "ForceGauge|Data")
+	UForceGaugeData* ForceGaugeData;
 	
 	//==== Components ====
 
