@@ -210,7 +210,7 @@ AEGForceGauge* AEGPlayer::SpawnForceGauge()
 	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
 	ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
 
-	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
+ 	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
 
 	ForceGaugePtr->SetForce(NormalizedForce);
 	
