@@ -8,7 +8,6 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
 #include "ExoGolf/Actors/Others/EGForceGauge.h"
-#include "ExoGolf/Datas/Enums.h"
 #include "ExoGolf/Datas/Data_Assets/PlayerData.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"

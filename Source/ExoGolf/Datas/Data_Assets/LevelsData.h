@@ -15,7 +15,7 @@ class EXOGOLF_API ULevelsData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	int32 CurrentLevelIndex = 0;
 	
 	UPROPERTY(EditAnywhere)

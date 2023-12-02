@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "EGMainMenu.generated.h"
 
+class UEGMainMenuButton;
 class UButton;
 /**
  * 
@@ -15,18 +16,47 @@ class EXOGOLF_API UEGMainMenu : public UUserWidget
 {
 	GENERATED_BODY()
 
+private:
+	//==== Exposed Fields ====
+	int32 CurrentButtonIndex;
+	
+	UPROPERTY()
+	TArray<UEGMainMenuButton*> Buttons;
+	
+	//==== Widgets ====
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* RightButton;
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* LeftButton;
+	
+    UPROPERTY(meta=(BindWidget))
+    UEGMainMenuButton* PlayButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UEGMainMenuButton* LevelsButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UEGMainMenuButton* HelpButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UEGMainMenuButton* QuitButton;
 
 private:
+	//==== Overrides ====
+	
+	virtual void NativeConstruct() override;
 
-    UPROPERTY(meta=(BindWidget))
-    UButton* PlayButton;
+	//==== Methods ====
+
+	void SetUpButtons();
 	
-	UPROPERTY(meta=(BindWidget))
-	UButton* LevelsButton;
-	
-	UPROPERTY(meta=(BindWidget))
-	UButton* HelpButton;
-	
-	UPROPERTY(meta=(BindWidget))
-	UButton* QuitButton;
+	//==== Event Handlers ====
+
+	UFUNCTION()
+	void RightButtonClicked();
+
+	UFUNCTION()
+	void LeftButtonClicked();
 };

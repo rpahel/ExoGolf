@@ -4,11 +4,17 @@
 #include "EGMainMenuButton.h"
 
 #include "Components/Button.h"
-#include "ExoGolf/Datas/Enums.h"
+#include "Components/TextBlock.h"
 
 //=======================================================================================|
 //==== PUBLIC ===========================================================================|
 //=======================================================================================|
+
+void UEGMainMenuButton::SetButtonRenderOpacity(float Opacity) const
+{
+	if(Button)
+		Button->SetRenderOpacity(Opacity);
+}
 
 UWidgetAnimation* UEGMainMenuButton::PlayButtonAnimation(const EMainMenuButtonAnimation& Animation)
 {
@@ -48,6 +54,9 @@ void UEGMainMenuButton::NativeConstruct()
 
 	if(Button)
 		Button->OnClicked.AddUniqueDynamic(this, &UEGMainMenuButton::ButtonClicked);
+
+	if(ButtonTextBlock)
+		ButtonTextBlock->SetText(ButtonText);
 }
 
 void UEGMainMenuButton::NativeDestruct()

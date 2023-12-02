@@ -131,3 +131,11 @@ private:
 	UFUNCTION()
 	void SetCameraDistance(const FInputActionValue& Value);
 };
+
+UENUM()
+enum class EMouseButtonPressed
+{
+	None,
+	LMB,
+	RMB
+};

@@ -23,10 +23,15 @@ public:
 	FMainMenuButtonDelegate OnClickedDelegate;
 	
 private:
+	//==== Exposed Fields ====
+	
+	UPROPERTY(EditAnywhere)
+	FText ButtonText;
+	
 	//==== Widgets =====
 	
-	UPROPERTY(VisibleAnywhere, meta=(BindWidget), Category = "ButtonText")
-	UTextBlock* ButtonText;
+	UPROPERTY(meta=(BindWidget))
+	UTextBlock* ButtonTextBlock;
 
 	UPROPERTY(meta=(BindWidget))
 	UButton* Button;
@@ -49,6 +54,7 @@ private:
 	UWidgetAnimation* LeftExitAnimation;
 
 public:
+	void SetButtonRenderOpacity(float Opacity) const;
 	UWidgetAnimation* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
 	
 private:
@@ -61,4 +67,14 @@ private:
 
 	UFUNCTION()
 	void ButtonClicked();
+};
+
+UENUM()
+enum class EMainMenuButtonAnimation
+{
+	Click,
+	RightEnter,
+	LeftEnter,
+	RightExit,
+	LeftExit
 };
