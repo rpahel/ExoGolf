@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "EGMainMenu.generated.h"
 
+class UButton;
 /**
  * 
  */
@@ -14,4 +15,18 @@ class EXOGOLF_API UEGMainMenu : public UUserWidget
 {
 	GENERATED_BODY()
 
+
+private:
+
+    UPROPERTY(meta=(BindWidget))
+    UButton* PlayButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UButton* LevelsButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UButton* HelpButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UButton* QuitButton;
 };
