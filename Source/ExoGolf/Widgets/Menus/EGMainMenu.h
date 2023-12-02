@@ -13,5 +13,5 @@ UCLASS()
 class EXOGOLF_API UEGMainMenu : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 };

@@ -6,9 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "EGMainMenuButton.generated.h"
 
+enum class EMainMenuButtonAnimation;
+class UButton;
 class UTextBlock;
 
-DECLARE_DYNAMIC_DELEGATE(FMainMenuButtonDelegate);
+DECLARE_DELEGATE(FMainMenuButtonDelegate);
 /**
  * 
  */
@@ -26,8 +28,37 @@ private:
 	UPROPERTY(VisibleAnywhere, meta=(BindWidget), Category = "ButtonText")
 	UTextBlock* ButtonText;
 
+	UPROPERTY(meta=(BindWidget))
+	UButton* Button;
+
+	//==== Animations ====
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* ClickAnimation;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* RightEnterAnimation;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* LeftEnterAnimation;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* RightExitAnimation;
+
+	UPROPERTY(meta=(BindWidgetAnim), Transient)
+	UWidgetAnimation* LeftExitAnimation;
+
+public:
+	UWidgetAnimation* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
+	
 private:
 	//==== Overrides ====
 
+	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+
+	//==== Event Handlers ====
+
+	UFUNCTION()
+	void ButtonClicked();
 };
