@@ -14,6 +14,7 @@ void UEGMainMenu::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	bCanClick = true;
 	SetUpButtons();
 }
 
@@ -45,6 +46,9 @@ void UEGMainMenu::SetUpButtons()
 
 void UEGMainMenu::RightButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	Buttons[CurrentButtonIndex]->PlayButtonAnimation(EMainMenuButtonAnimation::LeftExit);
 
 	CurrentButtonIndex++;
@@ -52,15 +56,32 @@ void UEGMainMenu::RightButtonClicked()
 		CurrentButtonIndex = 0;
 	
 	Buttons[CurrentButtonIndex]->PlayButtonAnimation(EMainMenuButtonAnimation::RightEnter);
+
+	bCanClick = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		ClickCooldownHandle,
+		[this]{bCanClick = true;},
+		0.75f,
+		false);
 }
 
 void UEGMainMenu::LeftButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	Buttons[CurrentButtonIndex]->PlayButtonAnimation(EMainMenuButtonAnimation::RightExit);
 
 	CurrentButtonIndex--;
 	if(CurrentButtonIndex < 0)
 		CurrentButtonIndex = Buttons.Num()-1;
-	
+
 	Buttons[CurrentButtonIndex]->PlayButtonAnimation(EMainMenuButtonAnimation::LeftEnter);
+
+	bCanClick = false;
+	GetWorld()->GetTimerManager().SetTimer(
+		ClickCooldownHandle,
+		[this]{bCanClick = true;},
+		0.75f,
+		false);
 }

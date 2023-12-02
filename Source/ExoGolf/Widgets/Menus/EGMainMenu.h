@@ -18,7 +18,9 @@ class EXOGOLF_API UEGMainMenu : public UUserWidget
 
 private:
 	//==== Exposed Fields ====
+	bool bCanClick;
 	int32 CurrentButtonIndex;
+	FTimerHandle ClickCooldownHandle;
 	
 	UPROPERTY()
 	TArray<UEGMainMenuButton*> Buttons;
