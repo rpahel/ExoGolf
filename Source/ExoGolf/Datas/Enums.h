@@ -9,3 +9,13 @@ enum class EMouseButtonPressed
 	LMB,
 	RMB
 };
+
+UENUM()
+enum class EMainMenuButtonAnimation
+{
+	Click,
+	RightEnter,
+	LeftEnter,
+	RightExit,
+	LeftExit
+};
