@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "ExoGolf/Actors/Others/EGForceGauge.h"
+#include "ExoGolf/Actors/Others/ForceGauge.h"
 #include "PlayerData.generated.h"
 
 /**
@@ -19,7 +19,7 @@ public:
 	
 	// The force gauge to show the strike force of the player.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")
-	TSubclassOf<AEGForceGauge> ForceGauge = nullptr;
+	TSubclassOf<AForceGauge> ForceGauge = nullptr;
 	
 	// The minimum distance the player has to pull back its cursor to be considered a strike.
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Gameplay|Strike")

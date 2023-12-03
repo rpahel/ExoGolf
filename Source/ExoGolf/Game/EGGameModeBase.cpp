@@ -12,9 +12,11 @@ APawn* AEGGameModeBase::SpawnDefaultPawnFor_Implementation(AController* NewPlaye
 		return nullptr;
 	
 	const FName CurrentLevel = FName(UGameplayStatics::GetCurrentLevelName(GetWorld()));
-	const FName FirstLevel = LevelsData->LevelsInGame[0];
+	TArray<FName> Keys;
+	if(LevelsData->LevelsInGame.GetKeys(Keys) <= 0)
+		return nullptr;
 	
-	if(CurrentLevel == FirstLevel)
+	if(CurrentLevel == Keys[0])
 	{
 		return nullptr;
 	}

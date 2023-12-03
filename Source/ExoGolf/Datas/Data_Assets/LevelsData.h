@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "ExoGolf/Datas/Structs/LevelInfo.h"
 #include "LevelsData.generated.h"
 
 /**
@@ -17,5 +18,5 @@ class EXOGOLF_API ULevelsData : public UDataAsset
 public:
 	
 	UPROPERTY(EditAnywhere)
-	TArray<FName> LevelsInGame;
+	TMap<FName, FLevelInfo> LevelsInGame;
 };

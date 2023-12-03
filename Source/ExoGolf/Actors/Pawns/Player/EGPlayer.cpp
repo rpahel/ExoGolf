@@ -7,7 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SphereComponent.h"
-#include "ExoGolf/Actors/Others/EGForceGauge.h"
+#include "ExoGolf/Actors/Others/ForceGauge.h"
 #include "ExoGolf/Datas/Data_Assets/PlayerData.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -90,36 +90,6 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 }
 
 //=======================================================================================|
-//=========================== INTERFACE IMPLEMENTATIONS =================================|
-//=======================================================================================|
-
-void AEGPlayer::UniformAddScale(float Amount)
-{
-	const FVector NewScale = SphereComponent->GetComponentScale() + Amount;
-	SphereComponent->SetWorldScale3D(NewScale);
-}
-
-void AEGPlayer::NonUniformAddScale(float X, float Y, float Z)
-{
-	const FVector OldScale = SphereComponent->GetComponentScale();
-	const FVector NewScale = FVector(OldScale.X + X, OldScale.Y + Y, OldScale.Z + Z);
-	SphereComponent->SetWorldScale3D(NewScale);
-}
-
-void AEGPlayer::UniformMultiplyScale(float Amount)
-{
-	const FVector NewScale = SphereComponent->GetComponentScale() * Amount;
-	SphereComponent->SetWorldScale3D(NewScale);
-}
-
-void AEGPlayer::NonUniformMultiplyScale(float X, float Y, float Z)
-{
-	const FVector OldScale = SphereComponent->GetComponentScale();
-	const FVector NewScale = FVector(OldScale.X * X, OldScale.Y * Y, OldScale.Z * Z);
-	SphereComponent->SetWorldScale3D(NewScale);
-}
-
-//=======================================================================================|
 //=================================== OVERRIDES =========================================|
 //=======================================================================================|
 
@@ -184,7 +154,7 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 	PlayerController->SetShowMouseCursor(IsVisible);
 }
 
-AEGForceGauge* AEGPlayer::SpawnForceGauge()
+AForceGauge* AEGPlayer::SpawnForceGauge()
 {
 	const FVector BallPosition = GetActorLocation();
 	const TTuple<FVector, FVector> WorldMousePositionAndDirection = GetWorldMousePositionAndDirection();
@@ -206,7 +176,7 @@ AEGForceGauge* AEGPlayer::SpawnForceGauge()
 	CurrentStrikeForce = StrikeDistance * PlayerData->MaximumForce;
 	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
 
-	AEGForceGauge* ForceGaugePtr = World->SpawnActor<AEGForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
+	AForceGauge* ForceGaugePtr = World->SpawnActor<AForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
 	ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
 
  	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);

@@ -5,7 +5,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
-#include "ExoGolf/Widgets/Menus/EGMainMenu.h"
+#include "ExoGolf/Widgets/MainMenu/MainMenu.h"
 #include "Kismet/GameplayStatics.h"
 
 //=======================================================================================|
@@ -14,12 +14,10 @@
 
 void AEGHUD::LoadLevel(FName LevelName) const
 {
-	const int32 LevelIndex = LevelsData->LevelsInGame.IndexOfByKey(LevelName);
+	if(!LevelsData->LevelsInGame.Contains(LevelName))
+		return;
 	
-	if(LevelIndex != INDEX_NONE)
-	{
-		UGameplayStatics::OpenLevel(GetWorld(), LevelName, false);
-	}
+	UGameplayStatics::OpenLevel(GetWorld(), LevelName, false);
 }
 
 void AEGHUD::BeginPlay()
@@ -30,9 +28,11 @@ void AEGHUD::BeginPlay()
 		return;
 
 	const FName CurrentLevel = FName(UGameplayStatics::GetCurrentLevelName(GetWorld()));
-	const FName FirstLevel = LevelsData->LevelsInGame[0];
+	TArray<FName> Keys;
+	if(LevelsData->LevelsInGame.GetKeys(Keys) <= 0)
+		return;
 	
-	if(CurrentLevel == FirstLevel)
+	if(CurrentLevel == Keys[0])
 	{
 		if(MainMenu)
 		{
@@ -46,7 +46,7 @@ void AEGHUD::BeginPlay()
 			MainMenu->AddToViewport(0);
 		}
 
-		if(UEGMainMenu* CastMainMenu = Cast<UEGMainMenu>(MainMenu))
+		if(UMainMenu* CastMainMenu = Cast<UMainMenu>(MainMenu))
 		{
 			CastMainMenu->SetHUD(this);
 		}

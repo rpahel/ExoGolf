@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ExoGolf/ExosDeJerome/Scalable.h"
 #include "GameFramework/Pawn.h"
 #include "EGPlayer.generated.h"
 
@@ -11,7 +10,7 @@ enum class EMouseButtonPressed;
 struct FInputActionValue;
 
 class UPlayerData;
-class AEGForceGauge;
+class AForceGauge;
 class UInputAction;
 class UInputMappingContext;
 class USphereComponent;
@@ -20,7 +19,7 @@ class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class EXOGOLF_API AEGPlayer : public APawn, public IScalable
+class EXOGOLF_API AEGPlayer : public APawn
 {
 	GENERATED_BODY()
 
@@ -83,18 +82,11 @@ private:
 	APlayerController* PlayerController;
 
 	UPROPERTY()
-	AEGForceGauge* CurrentForceGauge = nullptr;
+	AForceGauge* CurrentForceGauge = nullptr;
 	
 public:
 	AEGPlayer();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
-	//==== Interface Implementations ====
-	
-	virtual void UniformAddScale(float Amount) override;
-	virtual void NonUniformAddScale(float X, float Y, float Z) override;
-	virtual void UniformMultiplyScale(float Amount) override;
-	virtual void NonUniformMultiplyScale(float X, float Y, float Z) override;
 	
 private:
 	//==== Overrides ====
@@ -109,7 +101,7 @@ private:
 	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const;
 	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition) const;
 	TTuple<FVector, FVector> GetWorldMousePositionAndDirection() const;
-	AEGForceGauge* SpawnForceGauge();
+	AForceGauge* SpawnForceGauge();
 	
 	//==== Input Handlers ====
 	
