@@ -140,28 +140,53 @@ void UMainMenu::LeftButtonClicked()
 
 void UMainMenu::PlayButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(PlayButton);
+	if(!Animation)
+		return;
+	
 	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Start);
 	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::LevelsButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(LevelsButton);
+	if(!Animation)
+		return;
+	
 	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::OpenLevelsMenu);
 	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::HelpButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(HelpButton);
+	if(!Animation)
+		return;
+	
 	//Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Start);
 	//DisableLeftAndRightButtons();
 }
 
 void UMainMenu::QuitButtonClicked()
 {
+	if(!bCanClick)
+		return;
+	
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(QuitButton);
+	
+	if(!Animation)
+		return;
+	
 	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Quit);
 	DisableLeftAndRightButtons();
 }
