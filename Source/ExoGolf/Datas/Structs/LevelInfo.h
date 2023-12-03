@@ -14,6 +14,9 @@ struct FLevelInfo
 	UPROPERTY(VisibleAnywhere)
 	uint32 CurrentStrikesAmount;
 
+	UPROPERTY(VisibleAnywhere)
+	uint32 StrikesItTookToFinish;
+
 	UPROPERTY(EditAnywhere)
 	uint32 ParStrikeAmount;
 
