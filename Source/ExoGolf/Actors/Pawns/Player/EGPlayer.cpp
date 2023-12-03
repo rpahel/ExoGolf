@@ -10,6 +10,7 @@
 #include "ExoGolf/Actors/Others/ForceGauge.h"
 #include "ExoGolf/Datas/Data_Assets/PlayerData.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 #if WITH_EDITOR
@@ -252,6 +253,8 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 
 	if(!CurrentForceGauge)
 		CurrentForceGauge = SpawnForceGauge();
+
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), PlayerData->TimeDilationFactor);
 }
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
@@ -272,6 +275,7 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 		SphereComponent->AddImpulse(Direction, NAME_None, true);
 		CurrentForceGauge->Destroy();
 		CurrentForceGauge = nullptr;
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
 	}
 
 	CurrentStrikeForce = 0;
@@ -286,6 +290,7 @@ void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 	{
 		CurrentForceGauge->Destroy();
 		CurrentForceGauge = nullptr;
+		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
 	}
 
 	CurrentStrikeForce = 0;
