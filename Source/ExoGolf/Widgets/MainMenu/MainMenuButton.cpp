@@ -24,12 +24,14 @@ void UMainMenuButton::SetButtonText(const FText& Text)
 		ButtonTextBlock->SetText(ButtonText);
 }
 
-FText UMainMenuButton::GetButtonText() const
+void UMainMenuButton::SetButtonIndex(const int32 Index)
 {
-	if(!ButtonTextBlock)
-		return FText::GetEmpty();
+	ButtonIndex = Index;
+}
 
-	return ButtonTextBlock->GetText();
+int32 UMainMenuButton::GetButtonIndex() const
+{
+	return ButtonIndex;
 }
 
 UUMGSequencePlayer* UMainMenuButton::PlayButtonAnimation(const EMainMenuButtonAnimation& Animation)

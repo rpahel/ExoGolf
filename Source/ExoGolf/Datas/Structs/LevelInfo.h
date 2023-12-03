@@ -8,6 +8,9 @@ struct FLevelInfo
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere)
+	FName DisplayName;
+	
 	UPROPERTY(VisibleAnywhere)
 	uint32 CurrentStrikesAmount;
 

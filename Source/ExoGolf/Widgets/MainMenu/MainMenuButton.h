@@ -33,6 +33,10 @@ private:
 	UPROPERTY(EditAnywhere)
 	FText ButtonText;
 	
+	//==== Hidden Fields ====
+
+	int32 ButtonIndex;
+	
 	//==== Widgets =====
 	
 	UPROPERTY(meta=(BindWidget))
@@ -61,7 +65,8 @@ private:
 public:
 	void SetButtonRenderOpacity(float Opacity) const;
 	void SetButtonText(const FText& Text);
-	FText GetButtonText() const;
+	void SetButtonIndex(const int32 Index);
+	int32 GetButtonIndex() const;
 	UUMGSequencePlayer* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
 	
 private:

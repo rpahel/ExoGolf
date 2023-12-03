@@ -33,6 +33,7 @@ private:
 	FName SelectedLevel;
 	FTimerHandle PostCreationWaitTimerHandle;
 	TArray<UMainMenuButton*> Buttons;
+	TArray<FName> Levels;
 
 	UPROPERTY()
 	AEGHUD* HUD;

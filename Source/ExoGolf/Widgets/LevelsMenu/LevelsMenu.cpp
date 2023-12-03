@@ -48,7 +48,7 @@ void ULevelsMenu::SetUpButtons()
 	if(!LevelsData)
 		return;
 
-	TArray<FName> Levels;
+	Levels.Empty();
 	LevelsData->LevelsInGame.GetKeys(Levels);
 	
 	for(int32 i = 1; i < Levels.Num() - 1; i++)
@@ -60,7 +60,8 @@ void ULevelsMenu::SetUpButtons()
 
 		if(UMainMenuButton* CastButton = Cast<UMainMenuButton>(LevelButton))
 		{
-			CastButton->SetButtonText(FText::FromName(Levels[i]));
+			CastButton->SetButtonText(FText::FromName(LevelsData->LevelsInGame[Levels[i]].DisplayName));
+			CastButton->SetButtonIndex(i);
 			CastButton->SetButtonRenderOpacity(0);
 			CastButton->OnClickedRefDelegate.BindUObject(this, &ULevelsMenu::LevelButtonClicked);
 
@@ -114,10 +115,14 @@ void ULevelsMenu::BackButtonClicked()
 
 void ULevelsMenu::LevelButtonClicked(UMainMenuButton* Button)
 {
-	if(!Button)
+	if(!Button || Levels.IsEmpty())
 		return;
 
-	SelectedLevel = FName(Button->GetButtonText().ToString());
+	int32 Index = Button->GetButtonIndex();
+	if(Index <= 0 || Index >= Levels.Num() - 1)
+		return;
+	
+	SelectedLevel = Levels[Index];
 	UUMGSequencePlayer* Sequence = Button->PlayButtonAnimation(EMainMenuButtonAnimation::Click);
 	Sequence->OnSequenceFinishedPlaying().AddUObject(this, &ULevelsMenu::PlaySelectedLevel);
 
