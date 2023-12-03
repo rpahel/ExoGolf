@@ -36,9 +36,7 @@ private:
 	UUserWidget* HUD;
 
 public:
-	void LoadNextLevel() const;
-	void LoadLevelByIndex(int32 LevelIndex) const;
-	void LoadLevelByName(FName LevelName) const;
+	void LoadLevel(FName LevelName) const;
 
 private:
 	virtual void BeginPlay() override;

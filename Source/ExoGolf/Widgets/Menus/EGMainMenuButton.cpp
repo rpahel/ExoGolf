@@ -16,29 +16,24 @@ void UEGMainMenuButton::SetButtonRenderOpacity(float Opacity) const
 		Button->SetRenderOpacity(Opacity);
 }
 
-UWidgetAnimation* UEGMainMenuButton::PlayButtonAnimation(const EMainMenuButtonAnimation& Animation)
+UUMGSequencePlayer* UEGMainMenuButton::PlayButtonAnimation(const EMainMenuButtonAnimation& Animation)
 {
 	switch(Animation)
 	{
 		case EMainMenuButtonAnimation::Click:
-		PlayAnimation(ClickAnimation);
-		return ClickAnimation;
+		return PlayAnimation(ClickAnimation);
 
 		case EMainMenuButtonAnimation::RightEnter:
-		PlayAnimation(RightEnterAnimation);
-		return RightEnterAnimation;
+		return PlayAnimation(RightEnterAnimation);
 
 		case EMainMenuButtonAnimation::LeftEnter:
-		PlayAnimation(LeftEnterAnimation);
-		return LeftEnterAnimation;
+		return PlayAnimation(LeftEnterAnimation);
 
 		case EMainMenuButtonAnimation::RightExit:
-		PlayAnimation(RightExitAnimation);
-		return RightExitAnimation;
+		return PlayAnimation(RightExitAnimation);
 
 		case EMainMenuButtonAnimation::LeftExit:
-		PlayAnimation(LeftExitAnimation);
-		return LeftExitAnimation;
+		return PlayAnimation(LeftExitAnimation);
 	}
 
 	return nullptr;

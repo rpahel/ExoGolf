@@ -5,33 +5,19 @@
 
 #include "Blueprint/UserWidget.h"
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
+#include "ExoGolf/Widgets/Menus/EGMainMenu.h"
 #include "Kismet/GameplayStatics.h"
 
 //=======================================================================================|
 //==== PUBLIC ===========================================================================|
 //=======================================================================================|
 
-void AEGHUD::LoadNextLevel() const
-{
-	LoadLevelByIndex(LevelsData->CurrentLevelIndex + 1);
-}
-
-void AEGHUD::LoadLevelByIndex(int32 LevelIndex) const
-{
-	if(LevelIndex < 0 || LevelIndex >= LevelsData->LevelsInGame.Num())
-		return;
-
-	LevelsData->CurrentLevelIndex = LevelIndex;
-	UGameplayStatics::OpenLevel(GetWorld(), LevelsData->LevelsInGame[LevelIndex], false);
-}
-
-void AEGHUD::LoadLevelByName(FName LevelName) const
+void AEGHUD::LoadLevel(FName LevelName) const
 {
 	const int32 LevelIndex = LevelsData->LevelsInGame.IndexOfByKey(LevelName);
 	
 	if(LevelIndex != INDEX_NONE)
 	{
-		LevelsData->CurrentLevelIndex = LevelIndex;
 		UGameplayStatics::OpenLevel(GetWorld(), LevelName, false);
 	}
 }
@@ -43,7 +29,10 @@ void AEGHUD::BeginPlay()
 	if(!LevelsData)
 		return;
 
-	if(LevelsData->CurrentLevelIndex == 0)
+	const FName CurrentLevel = FName(UGameplayStatics::GetCurrentLevelName(GetWorld()));
+	const FName FirstLevel = LevelsData->LevelsInGame[0];
+	
+	if(CurrentLevel == FirstLevel)
 	{
 		if(MainMenu)
 		{
@@ -57,6 +46,11 @@ void AEGHUD::BeginPlay()
 			MainMenu->AddToViewport(0);
 		}
 
+		if(UEGMainMenu* CastMainMenu = Cast<UEGMainMenu>(MainMenu))
+		{
+			CastMainMenu->SetHUD(this);
+		}
+		
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetShowMouseCursor(true);
 	}
 	else

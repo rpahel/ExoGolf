@@ -21,6 +21,7 @@ class EXOGOLF_API UEGMainMenuButton : public UUserWidget
 
 public:
 	FMainMenuButtonDelegate OnClickedDelegate;
+	FMainMenuButtonDelegate OnClickAnimationFinishedDelegate;
 	
 private:
 	//==== Exposed Fields ====
@@ -55,7 +56,7 @@ private:
 
 public:
 	void SetButtonRenderOpacity(float Opacity) const;
-	UWidgetAnimation* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
+	UUMGSequencePlayer* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
 	
 private:
 	//==== Overrides ====

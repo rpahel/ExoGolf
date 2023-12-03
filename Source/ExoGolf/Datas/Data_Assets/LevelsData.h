@@ -15,8 +15,6 @@ class EXOGOLF_API ULevelsData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-	int32 CurrentLevelIndex = 0;
 	
 	UPROPERTY(EditAnywhere)
 	TArray<FName> LevelsInGame;
