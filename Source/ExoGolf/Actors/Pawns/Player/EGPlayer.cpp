@@ -247,10 +247,7 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 	MouseButtonPressed = EMouseButtonPressed::LMB;
 	SetCursorVisibility(false);
 
-	if(World == nullptr || PlayerData->ForceGauge == nullptr)
-		return;
-
-	if(!PlayerData->ForceGauge)
+	if(!World || !PlayerData->ForceGauge)
 		return;
 
 	if(!CurrentForceGauge)
@@ -264,7 +261,11 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 		MouseButtonPressed = EMouseButtonPressed::None;
 		SetCursorVisibility(true);
 	}
-
+	else
+	{
+		SetCursorVisibility(false);
+	}
+	
 	if(CurrentForceGauge)
 	{
 		const FVector Direction = -CurrentStrikeForce * CurrentForceGauge->GetActorRotation().Vector();
@@ -296,6 +297,10 @@ void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 	{
 		MouseButtonPressed = EMouseButtonPressed::None;
 		SetCursorVisibility(true);
+	}
+	else
+	{
+		SetCursorVisibility(false);
 	}
 }
 
