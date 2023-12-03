@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "ExoGolf/Datas/Interfaces/GameMenuInterface.h"
 #include "MainMenu.generated.h"
 
 class AEGHUD;
@@ -14,7 +15,7 @@ class UButton;
  * 
  */
 UCLASS()
-class EXOGOLF_API UMainMenu : public UUserWidget
+class EXOGOLF_API UMainMenu : public UUserWidget, public IGameMenuInterface
 {
 	GENERATED_BODY()
 
@@ -51,7 +52,7 @@ private:
 	UMainMenuButton* QuitButton;
 
 public:
-	void SetHUD(AEGHUD* Hud);
+	virtual void SetHUD(AEGHUD* Hud) override;
 	
 private:
 	//==== Overrides ====
@@ -63,7 +64,9 @@ private:
 
 	void SetUpButtons();
 	void Start(UUMGSequencePlayer& Sequence);
+	void OpenLevelsMenu(UUMGSequencePlayer& Sequence);
 	void Quit(UUMGSequencePlayer& Sequence);
+	void DisableLeftAndRightButtons() const;
 	UUMGSequencePlayer* PlayClickAnimationForButton(UMainMenuButton* Button);
 	
 	//==== Event Handlers ====

@@ -74,6 +74,15 @@ void UMainMenu::SetUpButtons()
 	}
 }
 
+void UMainMenu::DisableLeftAndRightButtons() const
+{
+	if(!RightButton || !LeftButton)
+		return;
+
+	RightButton->SetVisibility(ESlateVisibility::HitTestInvisible);
+	LeftButton->SetVisibility(ESlateVisibility::HitTestInvisible);
+}
+
 UUMGSequencePlayer* UMainMenu::PlayClickAnimationForButton(UMainMenuButton* Button)
 {
 	if(!bCanClick || !Button)
@@ -133,34 +142,40 @@ void UMainMenu::PlayButtonClicked()
 {
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(PlayButton);
 	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Start);
+	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::LevelsButtonClicked()
 {
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(LevelsButton);
-
-	//AnimationFinishedDelegate.BindDynamic(this, &UEGMainMenu::Start);
-	//Animation->BindToAnimationFinished(this, AnimationFinishedDelegate);
+	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::OpenLevelsMenu);
+	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::HelpButtonClicked()
 {
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(HelpButton);
-
-	//AnimationFinishedDelegate.BindDynamic(this, &UEGMainMenu::Start);
-	//Animation->BindToAnimationFinished(this, AnimationFinishedDelegate);
+	//Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Start);
+	//DisableLeftAndRightButtons();
 }
 
 void UMainMenu::QuitButtonClicked()
 {
 	UUMGSequencePlayer* Animation = PlayClickAnimationForButton(QuitButton);
 	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Quit);
+	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::Start(UUMGSequencePlayer& Sequence)
 {
 	if(HUD)
 		HUD->LoadLevel(TEXT("Level_001"));
+}
+
+void UMainMenu::OpenLevelsMenu(UUMGSequencePlayer& Sequence)
+{
+	if(HUD)
+		HUD->LoadMenu(EMenu::LevelsMenu);
 }
 
 void UMainMenu::Quit(UUMGSequencePlayer& Sequence)

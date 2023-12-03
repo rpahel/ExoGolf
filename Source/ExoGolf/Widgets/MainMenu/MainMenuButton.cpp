@@ -16,6 +16,22 @@ void UMainMenuButton::SetButtonRenderOpacity(float Opacity) const
 		Button->SetRenderOpacity(Opacity);
 }
 
+void UMainMenuButton::SetButtonText(const FText& Text)
+{
+	ButtonText = Text;
+	
+	if(ButtonTextBlock)
+		ButtonTextBlock->SetText(ButtonText);
+}
+
+FText UMainMenuButton::GetButtonText() const
+{
+	if(!ButtonTextBlock)
+		return FText::GetEmpty();
+
+	return ButtonTextBlock->GetText();
+}
+
 UUMGSequencePlayer* UMainMenuButton::PlayButtonAnimation(const EMainMenuButtonAnimation& Animation)
 {
 	switch(Animation)
@@ -59,6 +75,9 @@ void UMainMenuButton::NativeDestruct()
 	Super::NativeDestruct();
 
 	OnClickedDelegate.Unbind();
+	OnClickedRefDelegate.Unbind();
+	OnClickAnimationFinishedDelegate.Unbind();
+	OnClickAnimationFinishedRefDelegate.Unbind();
 }
 
 //=======================================================================================|
@@ -68,4 +87,5 @@ void UMainMenuButton::NativeDestruct()
 void UMainMenuButton::ButtonClicked()
 {
 	OnClickedDelegate.ExecuteIfBound();
+	OnClickedRefDelegate.ExecuteIfBound(this);
 }

@@ -11,6 +11,7 @@ class UButton;
 class UTextBlock;
 
 DECLARE_DELEGATE(FMainMenuButtonDelegate);
+DECLARE_DELEGATE_OneParam(FMainMenuButtonWithRefDelegate, class UMainMenuButton*);
 /**
  * 
  */
@@ -22,6 +23,9 @@ class EXOGOLF_API UMainMenuButton : public UUserWidget
 public:
 	FMainMenuButtonDelegate OnClickedDelegate;
 	FMainMenuButtonDelegate OnClickAnimationFinishedDelegate;
+
+	FMainMenuButtonWithRefDelegate OnClickedRefDelegate;
+	FMainMenuButtonWithRefDelegate OnClickAnimationFinishedRefDelegate;
 	
 private:
 	//==== Exposed Fields ====
@@ -56,6 +60,8 @@ private:
 
 public:
 	void SetButtonRenderOpacity(float Opacity) const;
+	void SetButtonText(const FText& Text);
+	FText GetButtonText() const;
 	UUMGSequencePlayer* PlayButtonAnimation(const EMainMenuButtonAnimation& Animation);
 	
 private:

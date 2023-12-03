@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "EGHUD.generated.h"
 
+enum class EMenu;
 class ULevelsData;
 /**
  * 
@@ -25,19 +26,36 @@ private:
 	TSubclassOf<UUserWidget> W_MainMenu;
 
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> W_LevelsMenu;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> W_HelpMenu;
+	
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> W_HUD;
 
 	//==== Hidden fields ====
-	
+
 	UPROPERTY()
-	UUserWidget* MainMenu;
+	UUserWidget* CurrentWidget;
 
 	UPROPERTY()
 	UUserWidget* HUD;
 
 public:
 	void LoadLevel(FName LevelName) const;
+	void LoadMenu(const EMenu Menu);
 
 private:
 	virtual void BeginPlay() override;
+	void KillCurrentWidget();
+	void SetHUDInCurrentWidget();
+};
+
+UENUM()
+enum class EMenu
+{
+	MainMenu,
+	LevelsMenu,
+	HelpMenu
 };
