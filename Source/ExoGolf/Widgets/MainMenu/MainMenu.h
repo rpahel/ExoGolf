@@ -7,6 +7,7 @@
 #include "ExoGolf/Datas/Interfaces/GameMenuInterface.h"
 #include "MainMenu.generated.h"
 
+class UCreditsButton;
 class AEGHUD;
 class UMainMenuButton;
 class UUMGSequencePlayer;
@@ -50,6 +51,12 @@ private:
 	
 	UPROPERTY(meta=(BindWidget))
 	UMainMenuButton* QuitButton;
+
+	UPROPERTY(meta=(BindWidget))
+	UCreditsButton* RpahelButton;
+	
+	UPROPERTY(meta=(BindWidget))
+	UCreditsButton* KikiButton;
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;

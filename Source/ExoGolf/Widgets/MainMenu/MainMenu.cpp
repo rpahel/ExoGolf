@@ -3,6 +3,7 @@
 
 #include "MainMenu.h"
 
+#include "CreditsButton.h"
 #include "MainMenuButton.h"
 #include "Animation/UMGSequencePlayer.h"
 #include "Components/Button.h"
@@ -72,6 +73,12 @@ void UMainMenu::SetUpButtons()
 		if(Buttons[i])
 			Buttons[i]->SetButtonRenderOpacity(0);
 	}
+
+	if(RpahelButton)
+		RpahelButton->SetUpButton();
+
+	if(KikiButton)
+		KikiButton->SetUpButton();
 }
 
 void UMainMenu::DisableLeftAndRightButtons() const
