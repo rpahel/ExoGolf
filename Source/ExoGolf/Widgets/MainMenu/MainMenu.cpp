@@ -180,8 +180,8 @@ void UMainMenu::HelpButtonClicked()
 	if(!Animation)
 		return;
 	
-	//Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::Start);
-	//DisableLeftAndRightButtons();
+	Animation->OnSequenceFinishedPlaying().AddUObject(this, &UMainMenu::OpenHelpMenu);
+	DisableLeftAndRightButtons();
 }
 
 void UMainMenu::QuitButtonClicked()
@@ -208,6 +208,12 @@ void UMainMenu::OpenLevelsMenu(UUMGSequencePlayer& Sequence)
 {
 	if(HUD)
 		HUD->LoadMenu(EMenu::LevelsMenu);
+}
+
+void UMainMenu::OpenHelpMenu(UUMGSequencePlayer& Sequence)
+{
+	if(HUD)
+		HUD->LoadMenu(EMenu::HelpMenu);
 }
 
 void UMainMenu::Quit(UUMGSequencePlayer& Sequence)

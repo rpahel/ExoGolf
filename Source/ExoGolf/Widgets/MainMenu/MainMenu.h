@@ -72,6 +72,7 @@ private:
 	void SetUpButtons();
 	void Start(UUMGSequencePlayer& Sequence);
 	void OpenLevelsMenu(UUMGSequencePlayer& Sequence);
+	void OpenHelpMenu(UUMGSequencePlayer& Sequence);
 	void Quit(UUMGSequencePlayer& Sequence);
 	void DisableLeftAndRightButtons() const;
 	UUMGSequencePlayer* PlayClickAnimationForButton(UMainMenuButton* Button);

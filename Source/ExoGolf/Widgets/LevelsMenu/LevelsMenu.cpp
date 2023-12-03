@@ -4,6 +4,7 @@
 #include "LevelsMenu.h"
 
 #include "Animation/UMGSequencePlayer.h"
+#include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/ScrollBoxSlot.h"
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
@@ -45,6 +46,9 @@ void ULevelsMenu::NativeDestruct()
 
 void ULevelsMenu::SetUpButtons()
 {
+	if(BackButton)
+		BackButton->OnClicked.AddUniqueDynamic(this, &ULevelsMenu::BackButtonClicked);
+	
 	if(!LevelsData)
 		return;
 

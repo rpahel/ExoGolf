@@ -7,6 +7,7 @@
 #include "ExoGolf/Datas/Interfaces/GameMenuInterface.h"
 #include "LevelsMenu.generated.h"
 
+class UButton;
 class AEGHUD;
 class UMainMenuButton;
 class UScrollBox;
@@ -42,6 +43,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UScrollBox* ScrollBox;
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* BackButton;
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
