@@ -22,7 +22,7 @@
 
 AEGPlayer::AEGPlayer()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collider"));
 	if(SphereComponent)
@@ -87,6 +87,14 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EIC->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &AEGPlayer::SetCameraDistance);
 	}
+}
+
+void AEGPlayer::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if(CurrentForceGauge)
+		CurrentForceGauge->SetActorLocation(GetActorLocation());
 }
 
 //=======================================================================================|

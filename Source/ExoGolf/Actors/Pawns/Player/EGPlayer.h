@@ -87,6 +87,7 @@ private:
 public:
 	AEGPlayer();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	virtual void Tick(float DeltaSeconds) override;
 	
 private:
 	//==== Overrides ====
