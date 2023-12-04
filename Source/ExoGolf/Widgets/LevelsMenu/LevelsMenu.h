@@ -59,7 +59,7 @@ private:
 	//==== Methods ====
 
 	void SetUpButtons();
-	void PlaySelectedLevel(UUMGSequencePlayer& Sequence);
+	void PlaySelectedLevel();
 
 	//==== Event Handlers
 

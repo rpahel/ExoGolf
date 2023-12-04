@@ -39,9 +39,6 @@ private:
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
 
-	UPROPERTY()
-	UUserWidget* HUD;
-
 public:
 	void LoadLevel(FName LevelName) const;
 	void LoadMenu(const EMenu Menu);

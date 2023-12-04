@@ -88,8 +88,8 @@ void AEGHUD::BeginPlay()
 		
 		if(W_HUD)
 		{
-			HUD = CreateWidget(UGameplayStatics::GetPlayerController(GetWorld(),0), W_HUD);
-			HUD->AddToViewport(0);
+			CurrentWidget = CreateWidget(UGameplayStatics::GetPlayerController(GetWorld(),0), W_HUD);
+			CurrentWidget->AddToViewport(0);
 		}
 	}
 

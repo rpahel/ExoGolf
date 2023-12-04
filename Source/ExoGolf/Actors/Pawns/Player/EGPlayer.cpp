@@ -89,6 +89,11 @@ void AEGPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EIC->BindAction(IA_Scroll, ETriggerEvent::Triggered, this, &AEGPlayer::SetCameraDistance);
 	}
+
+	if(IA_Pause)
+	{
+		EIC->BindAction(IA_Pause, ETriggerEvent::Started, this, &AEGPlayer::OpenPauseMenu);
+	}
 }
 
 void AEGPlayer::Tick(float DeltaSeconds)
@@ -99,9 +104,15 @@ void AEGPlayer::Tick(float DeltaSeconds)
 		CurrentForceGauge->SetActorLocation(GetActorLocation());
 }
 
-void AEGPlayer::SetHeadsUpDisplay(UHeadsUpDisplay* HUD)
+void AEGPlayer::ReturnToLastPosition()
 {
-	HeadsUpDisplay = HUD;
+	if(!SphereComponent)
+		return;
+	
+	SphereComponent->SetPhysicsLinearVelocity(FVector::Zero());
+	SphereComponent->SetPhysicsAngularVelocityInRadians(FVector::Zero());
+
+	SetActorLocation(LastPosition);
 }
 
 //=======================================================================================|
@@ -116,11 +127,27 @@ void AEGPlayer::BeginPlay()
 
 	if(SpringArmComponent)
 		SpringArmComponent->TargetArmLength = PlayerData->CameraMaximumDistance;
+
+	LastPosition = GetActorLocation();
 }
 
 //=======================================================================================|
 //==================================== METHODS ==========================================|
 //=======================================================================================|
+
+bool AEGPlayer::IsGrounded() const
+{
+	if(!SphereComponent)
+		return false;
+
+	FHitResult OutHit;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	
+	const FVector Start = GetActorLocation();
+	const FVector End = GetActorLocation() + (SphereComponent->GetUnscaledSphereRadius() + 1) * FVector::DownVector;
+	return GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, ECC_WorldStatic);
+}
 
 void AEGPlayer::UpdateForceGauge()
 {
@@ -251,6 +278,9 @@ TTuple<FVector, FVector> AEGPlayer::GetWorldMousePositionAndDirection() const
 
 void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	MouseButtonPressed = EMouseButtonPressed::LMB;
 	SetCursorVisibility(false);
 
@@ -265,6 +295,9 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	if(MouseButtonPressed == EMouseButtonPressed::LMB)
 	{
 		MouseButtonPressed = EMouseButtonPressed::None;
@@ -275,20 +308,30 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 		SetCursorVisibility(false);
 	}
 	
-	if(CurrentForceGauge)
+	if(!CurrentForceGauge)
+		return;
+	
+	if(IsGrounded())
 	{
-		const FVector Direction = -CurrentStrikeForce * CurrentForceGauge->GetActorRotation().Vector();
-		SphereComponent->AddImpulse(Direction, NAME_None, true);
-		CurrentForceGauge->Destroy();
-		CurrentForceGauge = nullptr;
-		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);
+		LastPosition = GetActorLocation();
+		GLog->Log("Last Position = " + LastPosition.ToString());
 	}
+
+	OnStrike.Broadcast();
+	const FVector Direction = -CurrentStrikeForce * CurrentForceGauge->GetActorRotation().Vector();
+	SphereComponent->AddImpulse(Direction, NAME_None, true);
+	CurrentForceGauge->Destroy();
+	CurrentForceGauge = nullptr;
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1.f);	
 
 	CurrentStrikeForce = 0;
 }
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	MouseButtonPressed = EMouseButtonPressed::RMB;
 	SetCursorVisibility(false);
 
@@ -304,6 +347,9 @@ void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	if(MouseButtonPressed == EMouseButtonPressed::RMB)
 	{
 		MouseButtonPressed = EMouseButtonPressed::None;
@@ -317,6 +363,9 @@ void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 
 void AEGPlayer::MousePositionChanged(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	if(MouseButtonPressed == EMouseButtonPressed::None)
 		return;
 
@@ -334,6 +383,9 @@ void AEGPlayer::MousePositionChanged(const FInputActionValue& Value)
 
 void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
 {
+	if(!bAllowInputs)
+		return;
+	
 	if(!SpringArmComponent)
 		return;
 
@@ -346,10 +398,14 @@ void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
 
 void AEGPlayer::OpenPauseMenu(const FInputActionValue& Value)
 {
-	if(!HeadsUpDisplay)
-		return;
+	if(CurrentForceGauge)
+	{
+		CurrentForceGauge->Destroy();
+		CurrentForceGauge = nullptr;
+	}
 
-	HeadsUpDisplay->ShowPauseMenu();
+	OnPause.Broadcast();
 
-	// TODO : Retirer les controles, arreter le temps
+	const float TimeDilation = UGameplayStatics::GetGlobalTimeDilation(GetWorld());
+	bAllowInputs = FMath::IsNearlyEqual(TimeDilation, 0.f, 0.001f) ? false : true;
 }

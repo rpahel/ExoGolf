@@ -99,7 +99,7 @@ void ULevelsMenu::SetUpButtons()
 		false);
 }
 
-void ULevelsMenu::PlaySelectedLevel(UUMGSequencePlayer& Sequence)
+void ULevelsMenu::PlaySelectedLevel()
 {
 	if(!HUD || SelectedLevel == FName(""))
 		return;
@@ -127,8 +127,16 @@ void ULevelsMenu::LevelButtonClicked(UMainMenuButton* Button)
 		return;
 	
 	SelectedLevel = Levels[Index];
-	UUMGSequencePlayer* Sequence = Button->PlayButtonAnimation(EMainMenuButtonAnimation::Click);
-	Sequence->OnSequenceFinishedPlaying().AddUObject(this, &ULevelsMenu::PlaySelectedLevel);
+	
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		[this]
+		{
+			PlaySelectedLevel();
+		},
+		1.f,
+		false);
 
 	uint32 FlipFlop = 0;
 	for (UMainMenuButton* Element : Buttons)

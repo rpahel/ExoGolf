@@ -9,17 +9,17 @@ struct FLevelInfo
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	FName DisplayName;
+	FName DisplayName = FName("");
 	
 	UPROPERTY(VisibleAnywhere)
-	uint32 CurrentStrikesAmount;
+	uint32 CurrentStrikesAmount = 0;
 
 	UPROPERTY(VisibleAnywhere)
-	uint32 StrikesItTookToFinish;
+	uint32 StrikesItTookToFinish = 0;
 
 	UPROPERTY(EditAnywhere)
-	uint32 ParStrikeAmount;
+	uint8 ParStrikeAmount = 0;
 
 	UPROPERTY(VisibleAnywhere)
-	float PlayerTime;
+	float PlayerTime = 0;
 };

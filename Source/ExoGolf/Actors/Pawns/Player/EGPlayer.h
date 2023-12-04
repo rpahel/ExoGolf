@@ -20,11 +20,17 @@ class UStaticMeshComponent;
 class USpringArmComponent;
 class UCameraComponent;
 
+DECLARE_MULTICAST_DELEGATE(FPlayerDelegate);
+
 UCLASS()
 class EXOGOLF_API AEGPlayer : public APawn
 {
 	GENERATED_BODY()
 
+public:
+	FPlayerDelegate OnStrike;
+	FPlayerDelegate OnPause;
+	
 private:
 	//==== Exposed Fields ====
 
@@ -67,11 +73,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
 	UInputAction* IA_Scroll;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Player|Inputs")
+	UInputAction* IA_Pause;
+
 	UPROPERTY()
 	UEnhancedInputComponent* EIC;
 	
 	//==== Fields ====
 
+	bool bAllowInputs = true;
 	float CurrentStrikeForce = 0;
 	FVector LastPosition = FVector::Zero();
 	FIntPoint MouseLastPos = FIntPoint::ZeroValue;
@@ -85,15 +95,13 @@ private:
 
 	UPROPERTY()
 	AForceGauge* CurrentForceGauge = nullptr;
-
-	UPROPERTY()
-	UHeadsUpDisplay* HeadsUpDisplay;
 	
 public:
 	AEGPlayer();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaSeconds) override;
-	void SetHeadsUpDisplay(UHeadsUpDisplay* HUD);
+	void ReturnToLastPosition();
+	void AllowInputs(){bAllowInputs = true;}
 	
 private:
 	//==== Overrides ====
@@ -102,6 +110,7 @@ private:
 
 	//==== Methods ====
 
+	bool IsGrounded() const;
 	void UpdateForceGauge();
 	void RotateCamera(const FVector2D& MouseDelta) const;
 	void SetCursorVisibility(const bool IsVisible);
