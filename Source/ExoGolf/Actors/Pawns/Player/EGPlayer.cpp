@@ -9,6 +9,7 @@
 #include "Components/SphereComponent.h"
 #include "ExoGolf/Actors/Others/ForceGauge.h"
 #include "ExoGolf/Datas/Data_Assets/PlayerData.h"
+#include "ExoGolf/Widgets/HUD/HeadsUpDisplay.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -96,6 +97,11 @@ void AEGPlayer::Tick(float DeltaSeconds)
 
 	if(CurrentForceGauge)
 		CurrentForceGauge->SetActorLocation(GetActorLocation());
+}
+
+void AEGPlayer::SetHeadsUpDisplay(UHeadsUpDisplay* HUD)
+{
+	HeadsUpDisplay = HUD;
 }
 
 //=======================================================================================|
@@ -336,4 +342,14 @@ void AEGPlayer::SetCameraDistance(const FInputActionValue& Value)
 		SpringArmComponent->TargetArmLength + Delta,
 		PlayerData->CameraMinimumDistance,
 		PlayerData->CameraMaximumDistance);
+}
+
+void AEGPlayer::OpenPauseMenu(const FInputActionValue& Value)
+{
+	if(!HeadsUpDisplay)
+		return;
+
+	HeadsUpDisplay->ShowPauseMenu();
+
+	// TODO : Retirer les controles, arreter le temps
 }

@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "GameFramework/Pawn.h"
 #include "EGPlayer.generated.h"
 
+class UHeadsUpDisplay;
 enum class EMouseButtonPressed;
 struct FInputActionValue;
 
@@ -83,11 +85,15 @@ private:
 
 	UPROPERTY()
 	AForceGauge* CurrentForceGauge = nullptr;
+
+	UPROPERTY()
+	UHeadsUpDisplay* HeadsUpDisplay;
 	
 public:
 	AEGPlayer();
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void Tick(float DeltaSeconds) override;
+	void SetHeadsUpDisplay(UHeadsUpDisplay* HUD);
 	
 private:
 	//==== Overrides ====
@@ -123,6 +129,9 @@ private:
 
 	UFUNCTION()
 	void SetCameraDistance(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void OpenPauseMenu(const FInputActionValue& Value);
 };
 
 UENUM()
