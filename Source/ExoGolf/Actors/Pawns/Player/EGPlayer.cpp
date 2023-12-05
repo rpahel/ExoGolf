@@ -408,4 +408,5 @@ void AEGPlayer::OpenPauseMenu(const FInputActionValue& Value)
 
 	const float TimeDilation = UGameplayStatics::GetGlobalTimeDilation(GetWorld());
 	bAllowInputs = FMath::IsNearlyEqual(TimeDilation, 0.f, 0.001f) ? false : true;
+	MouseButtonPressed = EMouseButtonPressed::None;
 }

@@ -20,10 +20,15 @@ void UHeadsUpDisplay::SetHUD(AEGHUD* Hud)
 
 void UHeadsUpDisplay::ShowPauseMenu()
 {
+	if(!Player)
+		return;
+	
 	if(PauseMenuWidget->GetVisibility() != ESlateVisibility::SelfHitTestInvisible)
 	{
 		UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0);
 		PauseMenuWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		Player->SetCursorVisibility(true);
+		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeUIOnly());
 	}
 	else
 	{
@@ -33,10 +38,15 @@ void UHeadsUpDisplay::ShowPauseMenu()
 
 void UHeadsUpDisplay::HidePauseMenu()
 {
+	if(!Player)
+		return;
+	
 	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1);
 	PauseMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 	HideAllHidableWidgets();
 	Player->AllowInputs();
+	Player->SetCursorVisibility(true);
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
 }
 
 //===============================================================================================

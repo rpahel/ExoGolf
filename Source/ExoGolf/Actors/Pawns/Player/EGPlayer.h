@@ -102,6 +102,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	void ReturnToLastPosition();
 	void AllowInputs(){bAllowInputs = true;}
+	void SetCursorVisibility(const bool IsVisible);
 	
 private:
 	//==== Overrides ====
@@ -113,7 +114,6 @@ private:
 	bool IsGrounded() const;
 	void UpdateForceGauge();
 	void RotateCamera(const FVector2D& MouseDelta) const;
-	void SetCursorVisibility(const bool IsVisible);
 	FVector GetProjectedMousePosition(const FVector& MousePosition, const FVector& MouseDirection) const;
 	FRotator GetForceGaugeDesiredRotation(const FVector& ProjectedMousePosition) const;
 	TTuple<FVector, FVector> GetWorldMousePositionAndDirection() const;
