@@ -9,7 +9,6 @@
 #include "Components/SphereComponent.h"
 #include "ExoGolf/Actors/Others/ForceGauge.h"
 #include "ExoGolf/Datas/Data_Assets/PlayerData.h"
-#include "ExoGolf/Widgets/HUD/HeadsUpDisplay.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -151,6 +150,9 @@ bool AEGPlayer::IsGrounded() const
 
 void AEGPlayer::UpdateForceGauge()
 {
+	if(!CurrentForceGauge)
+		return;
+	
 	const TTuple<FVector, FVector> MousePosAndDir = GetWorldMousePositionAndDirection();
 	const FVector ProjectedMousePosition = GetProjectedMousePosition(MousePosAndDir.Get<0>(), MousePosAndDir.Get<1>());
 	const FRotator ForceGaugeRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
@@ -265,8 +267,12 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 {
 	if(!bAllowInputs)
 		return;
-	
-	MouseButtonPressed = EMouseButtonPressed::LMB;
+
+	if(MouseButtonPressed == EMouseButtonPressed::RMB)
+		MouseButtonPressed = EMouseButtonPressed::Both;
+	else
+		MouseButtonPressed = EMouseButtonPressed::LMB;
+		
 	SetCursorVisibility(false);
 
 	if(!World || !PlayerData->ForceGauge)
@@ -280,18 +286,21 @@ void AEGPlayer::LeftClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 {
-	if(!bAllowInputs)
-		return;
-	
 	if(MouseButtonPressed == EMouseButtonPressed::LMB)
 	{
 		MouseButtonPressed = EMouseButtonPressed::None;
-		SetCursorVisibility(true);
+		if(bAllowInputs)
+			SetCursorVisibility(true);
 	}
-	else
+	else if(MouseButtonPressed == EMouseButtonPressed::Both)
 	{
-		SetCursorVisibility(false);
+		MouseButtonPressed = EMouseButtonPressed::RMB;
+		if(bAllowInputs)
+			SetCursorVisibility(false);
 	}
+
+	if(!bAllowInputs)
+		return;
 	
 	if(!CurrentForceGauge)
 		return;
@@ -314,12 +323,16 @@ void AEGPlayer::LeftClickStopped(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 {
+	if(MouseButtonPressed == EMouseButtonPressed::LMB)
+		MouseButtonPressed = EMouseButtonPressed::Both;
+	else
+		MouseButtonPressed = EMouseButtonPressed::RMB;
+	
 	if(!bAllowInputs)
 		return;
 	
-	MouseButtonPressed = EMouseButtonPressed::RMB;
 	SetCursorVisibility(false);
-
+	
 	if(CurrentForceGauge)
 	{
 		CurrentForceGauge->Destroy();
@@ -332,17 +345,17 @@ void AEGPlayer::RightClickStarted(const FInputActionValue& Value)
 
 void AEGPlayer::RightClickStopped(const FInputActionValue& Value)
 {
-	if(!bAllowInputs)
-		return;
-	
 	if(MouseButtonPressed == EMouseButtonPressed::RMB)
 	{
 		MouseButtonPressed = EMouseButtonPressed::None;
-		SetCursorVisibility(true);
+		if(bAllowInputs)
+			SetCursorVisibility(true);
 	}
-	else
+	else if(MouseButtonPressed == EMouseButtonPressed::Both)
 	{
-		SetCursorVisibility(false);
+		MouseButtonPressed = EMouseButtonPressed::LMB;
+		if(bAllowInputs)
+			SetCursorVisibility(false);
 	}
 }
 
@@ -360,8 +373,13 @@ void AEGPlayer::MousePositionChanged(const FInputActionValue& Value)
 	{
 		RotateCamera(MouseDeltaPosition);
 	}
-	else if(MouseButtonPressed == EMouseButtonPressed::LMB && CurrentForceGauge)
+	else if(MouseButtonPressed == EMouseButtonPressed::LMB)
 	{
+		UpdateForceGauge();
+	}
+	else
+	{
+		RotateCamera(MouseDeltaPosition);
 		UpdateForceGauge();
 	}
 }
@@ -391,7 +409,5 @@ void AEGPlayer::OpenPauseMenu(const FInputActionValue& Value)
 
 	OnPause.Broadcast();
 
-	const float TimeDilation = UGameplayStatics::GetGlobalTimeDilation(GetWorld());
-	bAllowInputs = FMath::IsNearlyEqual(TimeDilation, 0.f, 0.001f) ? false : true;
-	MouseButtonPressed = EMouseButtonPressed::None;
+	bAllowInputs = UGameplayStatics::IsGamePaused(GetWorld()) ? false : true;
 }

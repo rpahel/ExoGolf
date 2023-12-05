@@ -148,5 +148,6 @@ enum class EMouseButtonPressed
 {
 	None,
 	LMB,
-	RMB
+	RMB,
+	Both
 };
