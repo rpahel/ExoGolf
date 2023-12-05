@@ -199,31 +199,16 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 AForceGauge* AEGPlayer::SpawnForceGauge()
 {
 	const FVector BallPosition = GetActorLocation();
-	const TTuple<FVector, FVector> WorldMousePositionAndDirection = GetWorldMousePositionAndDirection();
-	const FVector ProjectedMousePosition = GetProjectedMousePosition(WorldMousePositionAndDirection.Get<0>(), WorldMousePositionAndDirection.Get<1>());
-
-#if WITH_EDITOR
-	if(bDebugMode)
-		DrawDebugSphere(World, ProjectedMousePosition, 2, 16, FColor::Red, false, 3);
-#endif
-	
-	const FRotator ForceGaugeDesiredRotation = GetForceGaugeDesiredRotation(ProjectedMousePosition);
-
 	FActorSpawnParameters SpawnParams = FActorSpawnParameters();
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AForceGauge* ForceGaugePtr = World->SpawnActor<AForceGauge>(PlayerData->ForceGauge, BallPosition, FRotator::ZeroRotator, SpawnParams);
 
-	// Set CurrentStrikeForce and ForceGaugeLength;
-	const float MousePositionDistance = ProjectedMousePosition.Length();
-	const float StrikeDistance = UKismetMathLibrary::NormalizeToRange(MousePositionDistance, PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
-	CurrentStrikeForce = StrikeDistance * PlayerData->MaximumForce;
-	CurrentStrikeForce = FMath::Clamp(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
-
-	AForceGauge* ForceGaugePtr = World->SpawnActor<AForceGauge>(PlayerData->ForceGauge, BallPosition, ForceGaugeDesiredRotation, SpawnParams);
-	ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
-
- 	const float NormalizedForce = UKismetMathLibrary::NormalizeToRange(CurrentStrikeForce, PlayerData->MinimumForce, PlayerData->MaximumForce);
-
-	ForceGaugePtr->SetForce(NormalizedForce);
+	if(ForceGaugePtr)
+	{
+		ForceGaugePtr->SetMinAndMaxLength(PlayerData->MinimumStrikeDistance, PlayerData->MaximumStrikeDistance);
+		CurrentForceGauge = ForceGaugePtr;
+		UpdateForceGauge();
+	}
 	
 	return ForceGaugePtr;
 }
