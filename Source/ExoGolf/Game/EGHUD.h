@@ -34,6 +34,9 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UUserWidget> W_HUD;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UUserWidget> W_End;
+
 	//==== Hidden fields ====
 
 	UPROPERTY()

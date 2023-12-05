@@ -16,7 +16,7 @@ APawn* AEGGameModeBase::SpawnDefaultPawnFor_Implementation(AController* NewPlaye
 	if(LevelsData->LevelsInGame.GetKeys(Keys) <= 0)
 		return nullptr;
 	
-	if(CurrentLevel == Keys[0])
+	if(CurrentLevel == Keys[0] || CurrentLevel == Keys[Keys.Num() - 1])
 	{
 		return nullptr;
 	}

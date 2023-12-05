@@ -81,6 +81,14 @@ void AEGHUD::BeginPlay()
 	else if(CurrentLevel == Keys[Keys.Num() - 1])
 	{
 		KillCurrentWidget();
+
+		if(W_End)
+		{
+			CurrentWidget = CreateWidget(UGameplayStatics::GetPlayerController(GetWorld(),0), W_End);
+			CurrentWidget->AddToViewport(0);
+		}
+
+		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetShowMouseCursor(true);
 	}
 	else
 	{
