@@ -18,9 +18,9 @@ class EXOGOLF_API UCountersDisplay : public UUserWidget
 private:
 	//==== Hidden Fields ====
 	
-	uint8 Seconds;
-	uint8 Minutes;
-	uint16 Strikes;
+	uint8 Seconds = 0;
+	uint8 Minutes = 0;
+	uint16 Strikes = 0;
 	
 	FNumberFormattingOptions ClockFormattingOptions;
 	FNumberFormattingOptions ParFormattingOptions;

@@ -40,9 +40,8 @@ private:
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
+	void CreateLevelButtons();
 	
 private:
-	virtual void NativeConstruct() override;
-	void CreateLevelButtons();
 	void LoadLevel(UMainMenuButton* Button);
 };

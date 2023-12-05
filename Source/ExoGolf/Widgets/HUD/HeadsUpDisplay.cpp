@@ -132,6 +132,7 @@ void UHeadsUpDisplay::ShowLevelSelector()
 		return;
 
 	LevelSelectorWidget->SetHUD(HUD);
+	LevelSelectorWidget->CreateLevelButtons();
 	LevelSelectorWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 

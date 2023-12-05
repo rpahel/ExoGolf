@@ -1,6 +1,7 @@
 ﻿#include "LevelSelector.h"
 
 #include "Components/ScrollBox.h"
+#include "Components/Spacer.h"
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
 #include "ExoGolf/Game/EGHUD.h"
 #include "ExoGolf/Widgets/MainMenu/MainMenuButton.h"
@@ -10,13 +11,19 @@ void ULevelSelector::CreateLevelButtons()
 	if(!ScrollBox || !LevelsData)
 		return;
 
+	if(ScrollBox->GetChildrenCount() > 1) // Account for the dummy
+		return;
+
 	int i = 0;
 	for (auto Level : LevelsData->LevelsInGame)
 	{
-		if(i==0 || i==LevelsData->LevelsInGame.Num())
+		if(i == 0)
+		{
+			i++;
 			continue;
+		}
 
-		i++;
+		
 		UMainMenuButton* LevelButton = Cast<UMainMenuButton>(CreateWidget(this, W_MainMenuButton));
 
 		if(!LevelButton)
@@ -26,6 +33,17 @@ void ULevelSelector::CreateLevelButtons()
 		LevelButton->SetButtonIndex(i);
 		LevelButton->OnClickedRefDelegate.BindUObject(this, &ULevelSelector::LoadLevel);
 		ScrollBox->AddChild(LevelButton);
+
+		if(i==(LevelsData->LevelsInGame.Num() - 2))
+			break;
+
+		if(USpacer* Spacer = NewObject<USpacer>())
+		{
+			Spacer->SetSize(FVector2D(20,0));
+			ScrollBox->AddChild(Spacer);
+		}
+		
+		i++;
 	}
 }
 
@@ -42,11 +60,4 @@ void ULevelSelector::LoadLevel(UMainMenuButton* Button)
 void ULevelSelector::SetHUD(AEGHUD* Hud)
 {
 	HUD = Hud;
-}
-
-void ULevelSelector::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	CreateLevelButtons();
 }
