@@ -7,6 +7,7 @@
 #include "ExoGolf/Datas/Interfaces/GameMenuInterface.h"
 #include "LevelSelector.generated.h"
 
+class UHeadsUpDisplay;
 class UMainMenuButton;
 class ULevelsData;
 class UScrollBox;
@@ -32,6 +33,9 @@ private:
 
 	UPROPERTY()
 	AEGHUD* HUD;
+
+	UPROPERTY()
+	UHeadsUpDisplay* HUDisplay;
 	
 	//==== Widgets ====
 	
@@ -40,6 +44,7 @@ private:
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
+	void SetHeadsUpDisplay(UHeadsUpDisplay* HeadsUpDisplay);
 	void CreateLevelButtons();
 	
 private:

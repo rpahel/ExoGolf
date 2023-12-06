@@ -118,15 +118,15 @@ void UHeadsUpDisplay::NativeConstruct()
 		CountersWidget->ResetTimer();
 		CountersWidget->SetPar(LevelsData->LevelsInGame[CurrentLevel].ParStrikeAmount);
 
+		FTimerHandle Handle;
 		GetWorld()->GetTimerManager().SetTimer(
-			TimerHandle,
+			Handle,
 			[this]
 			{
-				if(CountersWidget)
-					CountersWidget->IncrementSeconds();
+				StartTimerCounter();
 			},
 			1.f,
-			true,
+			false,
 			1.f);
 	}
 }
@@ -164,6 +164,7 @@ void UHeadsUpDisplay::ShowLevelSelector()
 		return;
 
 	LevelSelectorWidget->SetHUD(HUD);
+	LevelSelectorWidget->SetHeadsUpDisplay(this);
 	LevelSelectorWidget->CreateLevelButtons();
 	LevelSelectorWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
@@ -178,12 +179,14 @@ void UHeadsUpDisplay::ShowHelp()
 
 void UHeadsUpDisplay::ReturnToMainMenu()
 {
+	KillTimer();
 	if(HUD)
 		HUD->LoadLevel(FName("Level_MainMenu"));
 }
 
 void UHeadsUpDisplay::ShowFinishMenu()
 {
+	KillTimer();
 	if(FinishWidget && CountersWidget)
 	{
 		FinishWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
@@ -219,6 +222,21 @@ void UHeadsUpDisplay::Quit()
 
 void UHeadsUpDisplay::NextLevel()
 {
+	KillTimer();
 	if(HUD)
 		HUD->LoadNextLevel();
+}
+
+void UHeadsUpDisplay::StartTimerCounter()
+{
+	GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			[this]
+			{
+				if(CountersWidget)
+					CountersWidget->IncrementSeconds();
+			},
+			1.f,
+			true,
+			0.f);
 }

@@ -43,7 +43,10 @@ private:
 public:
 	TTuple<uint8, uint8, uint16> GetCounters(){return TTuple<uint8, uint8, uint16>(Minutes, Seconds, Strikes);}
 	void ResetTimer();
+
+	UFUNCTION()
 	void IncrementSeconds();
+	
 	void SetPar(uint8 Amount) const;
 	void ResetStrikes();
 	void IncrementStrikes();

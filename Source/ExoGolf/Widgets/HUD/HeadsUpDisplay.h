@@ -60,6 +60,7 @@ private:
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
+	void KillTimer(){TimerHandle.Invalidate();}
 
 	UFUNCTION()
 	void ShowPauseMenu();
@@ -99,4 +100,7 @@ private:
 
 	UFUNCTION()
 	void NextLevel();
+
+	UFUNCTION()
+	void StartTimerCounter();
 };

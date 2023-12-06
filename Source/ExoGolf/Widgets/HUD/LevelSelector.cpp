@@ -1,5 +1,6 @@
 ﻿#include "LevelSelector.h"
 
+#include "HeadsUpDisplay.h"
 #include "Components/ScrollBox.h"
 #include "Components/Spacer.h"
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
@@ -53,6 +54,9 @@ void ULevelSelector::LoadLevel(UMainMenuButton* Button)
 	if(!HUD || !LevelsData)
 		return;
 
+	if(HUDisplay)
+		HUDisplay->KillTimer();
+
 	TArray<FName> Levels;
 	LevelsData->LevelsInGame.GetKeys(Levels);
 	HUD->LoadLevel(Levels[Button->GetButtonIndex()]);
@@ -61,4 +65,9 @@ void ULevelSelector::LoadLevel(UMainMenuButton* Button)
 void ULevelSelector::SetHUD(AEGHUD* Hud)
 {
 	HUD = Hud;
+}
+
+void ULevelSelector::SetHeadsUpDisplay(UHeadsUpDisplay* HeadsUpDisplay)
+{
+	HUDisplay = HeadsUpDisplay;
 }
