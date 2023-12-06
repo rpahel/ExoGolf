@@ -229,6 +229,9 @@ void UHeadsUpDisplay::NextLevel()
 
 void UHeadsUpDisplay::StartTimerCounter()
 {
+	if(CountersWidget)
+		CountersWidget->ResetTimer();
+	
 	GetWorld()->GetTimerManager().SetTimer(
 			TimerHandle,
 			[this]
@@ -238,5 +241,5 @@ void UHeadsUpDisplay::StartTimerCounter()
 			},
 			1.f,
 			true,
-			0.f);
+			1.f);
 }

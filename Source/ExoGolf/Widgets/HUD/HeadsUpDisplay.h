@@ -60,7 +60,7 @@ private:
 
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
-	void KillTimer(){TimerHandle.Invalidate();}
+	void KillTimer(){GetWorld()->GetTimerManager().ClearTimer(TimerHandle); TimerHandle.Invalidate();}
 
 	UFUNCTION()
 	void ShowPauseMenu();
