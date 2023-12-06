@@ -18,8 +18,8 @@ class EXOGOLF_API UCountersDisplay : public UUserWidget
 private:
 	//==== Hidden Fields ====
 	
-	uint8 Seconds = 0;
-	uint8 Minutes = 0;
+	uint16 Seconds = 0;
+	uint16 Minutes = 0;
 	uint16 Strikes = 0;
 	
 	FNumberFormattingOptions ClockFormattingOptions;
@@ -41,6 +41,7 @@ private:
 	UTextBlock* StrikesDisplay;
 
 public:
+	TTuple<uint8, uint8, uint16> GetCounters(){return TTuple<uint8, uint8, uint16>(Minutes, Seconds, Strikes);}
 	void ResetTimer();
 	void IncrementSeconds();
 	void SetPar(uint8 Amount) const;

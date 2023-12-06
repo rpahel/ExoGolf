@@ -124,6 +124,9 @@ void AEGPlayer::BeginPlay()
 
 	World = GetWorld();
 
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
+	SetCursorVisibility(true);
+
 	if(SpringArmComponent)
 		SpringArmComponent->TargetArmLength = PlayerData->CameraMaximumDistance;
 
@@ -196,6 +199,12 @@ void AEGPlayer::SetCursorVisibility(const bool IsVisible)
 	}
 	
 	PlayerController->SetShowMouseCursor(IsVisible);
+}
+
+void AEGPlayer::FinishLevel()
+{
+	bAllowInputs = false;
+	OnFinish.Broadcast();
 }
 
 AForceGauge* AEGPlayer::SpawnForceGauge()

@@ -1,6 +1,7 @@
 ﻿#include "HeadsUpDisplay.h"
 
 #include "CountersDisplay.h"
+#include "FinishWidget.h"
 #include "LevelSelector.h"
 #include "LevelTitle.h"
 #include "PauseMenu.h"
@@ -81,10 +82,18 @@ void UHeadsUpDisplay::NativeConstruct()
 		PauseMenuWidget->OnQuitClicked.BindUObject(this, &UHeadsUpDisplay::ReturnToMainMenu);
 	}
 
+	if(FinishWidget)
+	{
+		FinishWidget->OnNextLevelClickedDelegate.BindUObject(this, &UHeadsUpDisplay::NextLevel);
+		FinishWidget->OnMainMenuClickedDelegate.BindUObject(this, &UHeadsUpDisplay::ReturnToMainMenu);
+		FinishWidget->OnQuitClickedDelegate.BindUObject(this, &UHeadsUpDisplay::Quit);
+	}
+
 	Player = Cast<AEGPlayer>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 	if(Player)
 	{
 		Player->OnPause.AddUObject(this, &UHeadsUpDisplay::ShowPauseMenu);
+		Player->OnFinish.AddUObject(this, &UHeadsUpDisplay::ShowFinishMenu);
 		Player->OnStrike.AddLambda(
 			[this]
 			{
@@ -109,7 +118,6 @@ void UHeadsUpDisplay::NativeConstruct()
 		CountersWidget->ResetTimer();
 		CountersWidget->SetPar(LevelsData->LevelsInGame[CurrentLevel].ParStrikeAmount);
 
-		FTimerHandle TimerHandle;
 		GetWorld()->GetTimerManager().SetTimer(
 			TimerHandle,
 			[this]
@@ -121,6 +129,21 @@ void UHeadsUpDisplay::NativeConstruct()
 			true,
 			1.f);
 	}
+}
+
+void UHeadsUpDisplay::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	TimerHandle.Invalidate();
+	LevelTitleWidget = nullptr;
+	PauseMenuWidget = nullptr;
+	CountersWidget = nullptr;
+	LevelSelectorWidget = nullptr;
+	HelpWidget = nullptr;
+	FinishWidget = nullptr;
+	Player = nullptr;
+	HUD = nullptr;
 }
 
 //===============================================================================================
@@ -157,4 +180,45 @@ void UHeadsUpDisplay::ReturnToMainMenu()
 {
 	if(HUD)
 		HUD->LoadLevel(FName("Level_MainMenu"));
+}
+
+void UHeadsUpDisplay::ShowFinishMenu()
+{
+	if(FinishWidget && CountersWidget)
+	{
+		FinishWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		TTuple<uint8, uint8, uint16> Counters = CountersWidget->GetCounters();
+
+		const FName CurrentLevelName = FName(UGameplayStatics::GetCurrentLevelName(GetWorld()));
+
+		if(!LevelsData)
+			return;
+
+		TArray<FName> Keys;
+		LevelsData->LevelsInGame.GetKeys(Keys);
+		const int32 Index = Keys.IndexOfByKey(CurrentLevelName);
+		const bool bHasNextLevel = Index == LevelsData->LevelsInGame.Num() - 1 ? false : true;
+		FinishWidget->SetUp(Counters.Get<0>(), Counters.Get<1>(), Counters.Get<2>(), !bHasNextLevel);
+
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+		if(Player)
+			Player->SetCursorVisibility(true);
+	}
+}
+
+void UHeadsUpDisplay::Quit()
+{
+	UKismetSystemLibrary::QuitGame(
+		GetWorld(),
+		UGameplayStatics::GetPlayerController(GetWorld(), 0),
+		EQuitPreference::Quit,
+		false
+	);
+}
+
+void UHeadsUpDisplay::NextLevel()
+{
+	if(HUD)
+		HUD->LoadNextLevel();
 }

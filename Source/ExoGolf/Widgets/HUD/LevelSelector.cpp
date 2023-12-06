@@ -5,6 +5,7 @@
 #include "ExoGolf/Datas/Data_Assets/LevelsData.h"
 #include "ExoGolf/Game/EGHUD.h"
 #include "ExoGolf/Widgets/MainMenu/MainMenuButton.h"
+#include "Kismet/GameplayStatics.h"
 
 void ULevelSelector::CreateLevelButtons()
 {
@@ -34,7 +35,7 @@ void ULevelSelector::CreateLevelButtons()
 		LevelButton->OnClickedRefDelegate.BindUObject(this, &ULevelSelector::LoadLevel);
 		ScrollBox->AddChild(LevelButton);
 
-		if(i==(LevelsData->LevelsInGame.Num() - 2))
+		if(i==(LevelsData->LevelsInGame.Num() - 1))
 			break;
 
 		if(USpacer* Spacer = NewObject<USpacer>())

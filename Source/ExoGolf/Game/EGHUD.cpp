@@ -20,6 +20,22 @@ void AEGHUD::LoadLevel(FName LevelName) const
 	UGameplayStatics::OpenLevel(GetWorld(), LevelName, false);
 }
 
+void AEGHUD::LoadNextLevel() const
+{
+	const FName CurrentLevelName = FName(UGameplayStatics::GetCurrentLevelName(GetWorld()));
+	if(!LevelsData)
+		return;
+
+	TArray<FName> Keys;
+	LevelsData->LevelsInGame.GetKeys(Keys);
+	const int32 Index = Keys.IndexOfByKey(CurrentLevelName);
+
+	if(Index == LevelsData->LevelsInGame.Num() - 1)
+		return;
+
+	LoadLevel(Keys[Index+1]);
+}
+
 void AEGHUD::LoadMenu(const EMenu Menu)
 {
 	KillCurrentWidget();
@@ -76,18 +92,6 @@ void AEGHUD::BeginPlay()
 			CurrentWidget->AddToViewport(0);
 		}
 		
-		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetShowMouseCursor(true);
-	}
-	else if(CurrentLevel == Keys[Keys.Num() - 1])
-	{
-		KillCurrentWidget();
-
-		if(W_End)
-		{
-			CurrentWidget = CreateWidget(UGameplayStatics::GetPlayerController(GetWorld(),0), W_End);
-			CurrentWidget->AddToViewport(0);
-		}
-
 		UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetShowMouseCursor(true);
 	}
 	else

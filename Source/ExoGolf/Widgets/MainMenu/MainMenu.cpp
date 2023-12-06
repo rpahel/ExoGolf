@@ -87,7 +87,7 @@ void UMainMenu::DisableLeftAndRightButtons() const
 		return;
 
 	RightButton->SetVisibility(ESlateVisibility::HitTestInvisible);
-	LeftButton->SetVisibility(ESlateVisibility::HitTestInvisible);
+	LeftButton->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 UUMGSequencePlayer* UMainMenu::PlayClickAnimationForButton(UMainMenuButton* Button)

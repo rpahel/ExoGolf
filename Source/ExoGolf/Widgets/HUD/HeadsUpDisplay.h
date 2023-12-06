@@ -7,6 +7,7 @@
 #include "ExoGolf/Datas/Interfaces/GameMenuInterface.h"
 #include "HeadsUpDisplay.generated.h"
 
+class UFinishWidget;
 class AEGHUD;
 class AEGPlayer;
 class ULevelsData;
@@ -29,6 +30,7 @@ private:
 	ULevelsData* LevelsData;
 	
 	//==== Hidden Fields ====
+	FTimerHandle TimerHandle;
 
 	UPROPERTY()
 	AEGPlayer* Player;
@@ -53,8 +55,13 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	UUserWidget* HelpWidget;
 
+	UPROPERTY(meta=(BindWidget))
+	UFinishWidget* FinishWidget;
+
 public:
 	virtual void SetHUD(AEGHUD* Hud) override;
+
+	UFUNCTION()
 	void ShowPauseMenu();
 
 	UFUNCTION()
@@ -68,6 +75,7 @@ private:
 	//==== Overrides ====
 
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	
 	//==== Event Handlers ====
 
@@ -82,4 +90,13 @@ private:
 
 	UFUNCTION()
 	void ReturnToMainMenu();
+
+	UFUNCTION()
+	void ShowFinishMenu();
+
+	UFUNCTION()
+	void Quit();
+
+	UFUNCTION()
+	void NextLevel();
 };

@@ -4,6 +4,7 @@
 #include "FinishLine.h"
 
 #include "Components/BoxComponent.h"
+#include "ExoGolf/Actors/Pawns/Player/EGPlayer.h"
 
 AFinishLine::AFinishLine()
 {
@@ -23,4 +24,8 @@ AFinishLine::AFinishLine()
 
 void AFinishLine::ActorOverlap(AActor* OverlappedActor, AActor* OtherActor)
 {
+	if(AEGPlayer* Player = Cast<AEGPlayer>(OtherActor))
+	{
+		Player->FinishLevel();
+	}
 }

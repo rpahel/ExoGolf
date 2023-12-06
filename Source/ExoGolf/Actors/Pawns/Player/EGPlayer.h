@@ -30,6 +30,7 @@ class EXOGOLF_API AEGPlayer : public APawn
 public:
 	FPlayerDelegate OnStrike;
 	FPlayerDelegate OnPause;
+	FPlayerDelegate OnFinish;
 	
 private:
 	//==== Exposed Fields ====
@@ -103,6 +104,7 @@ public:
 	void ReturnToLastPosition();
 	void AllowInputs(){bAllowInputs = true;}
 	void SetCursorVisibility(const bool IsVisible);
+	void FinishLevel();
 	
 private:
 	//==== Overrides ====

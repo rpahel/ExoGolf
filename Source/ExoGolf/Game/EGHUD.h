@@ -44,6 +44,7 @@ private:
 
 public:
 	void LoadLevel(FName LevelName) const;
+	void LoadNextLevel() const;
 	void LoadMenu(const EMenu Menu);
 
 private:

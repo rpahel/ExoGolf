@@ -55,7 +55,7 @@ void ULevelsMenu::SetUpButtons()
 	Levels.Empty();
 	LevelsData->LevelsInGame.GetKeys(Levels);
 	
-	for(int32 i = 1; i < Levels.Num() - 1; i++)
+	for(int32 i = 1; i < Levels.Num(); i++)
 	{
 		UUserWidget* LevelButton = CreateWidget(this, W_MainMenuButton);
 
@@ -123,7 +123,7 @@ void ULevelsMenu::LevelButtonClicked(UMainMenuButton* Button)
 		return;
 
 	int32 Index = Button->GetButtonIndex();
-	if(Index <= 0 || Index >= Levels.Num() - 1)
+	if(Index <= 0)
 		return;
 	
 	SelectedLevel = Levels[Index];
