@@ -200,7 +200,7 @@ void UHeadsUpDisplay::ShowFinishMenu()
 		TArray<FName> Keys;
 		LevelsData->LevelsInGame.GetKeys(Keys);
 		const int32 Index = Keys.IndexOfByKey(CurrentLevelName);
-		const bool bHasNextLevel = Index == LevelsData->LevelsInGame.Num() - 1 ? false : true;
+		const bool bHasNextLevel = Index != LevelsData->LevelsInGame.Num() - 1;
 		FinishWidget->SetUp(Counters.Get<0>(), Counters.Get<1>(), Counters.Get<2>(), !bHasNextLevel);
 
 		UGameplayStatics::SetGamePaused(GetWorld(), true);
@@ -229,6 +229,8 @@ void UHeadsUpDisplay::NextLevel()
 
 void UHeadsUpDisplay::StartTimerCounter()
 {
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	
 	if(CountersWidget)
 		CountersWidget->ResetTimer();
 	

@@ -26,7 +26,7 @@ void UFinishWidget::SetUp(const uint8 Minutes, const uint8 Seconds, const uint16
 		NumberFormattingOptions.MinimumIntegralDigits = 3;
 		NumberFormattingOptions.MaximumIntegralDigits = 3;
 		const FText Text = FText::AsNumber(Strikes, &NumberFormattingOptions);
-		TimerText->SetText(Text);
+		StrikesText->SetText(Text);
 	}
 
 	if(!NextLevelButton)
